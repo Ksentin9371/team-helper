@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>购买激活码 - Team Helper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="{{ url_for('static', filename='modal.js') }}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'SF Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 240 10% 3.9%;
+            --primary: 240 5.9% 10%;
+            --primary-foreground: 0 0% 98%;
+            --secondary: 240 4.8% 95.9%;
+            --muted: 240 4.8% 95.9%;
+            --muted-foreground: 240 3.8% 46.1%;
+            --border: 240 5.9% 90%;
+            --input: 240 5.9% 90%;
+            --radius: 0.5rem;
+        }
+
+        .shadcn-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.15s;
+            height: 2.5rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .shadcn-btn-primary {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .shadcn-btn-primary:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+
+        .shadcn-btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .shadcn-btn-success:hover {
+            background-color: #059669;
+        }
+
+        .shadcn-input {
+            width: 100%;
+            height: 2.5rem;
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--input));
+            background-color: transparent;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            transition: all 0.15s;
+        }
+
+        .shadcn-input:focus-visible {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+        }
+
+        .shadcn-card {
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: white;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .payment-method-btn {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: var(--radius);
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .payment-method-btn:hover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+
+        .payment-method-btn.active {
+            border-color: #3b82f6;
+            background-color: #dbeafe;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .payment-method-btn i {
+            color: #6b7280;
+        }
+
+        .payment-method-btn.active i {
+            color: #3b82f6;
+        }
+
+        .payment-method-btn span {
+            color: #374151;
+        }
+
+        .payment-method-btn.active span {
+            color: #1e40af;
+        }
+
+        /* 微信支付绿色样式 */
+        .payment-method-btn[data-method="wxpay"]:hover {
+            border-color: #10b981;
+            background-color: #ecfdf5;
+        }
+
+        .payment-method-btn[data-method="wxpay"].active {
+            border-color: #10b981;
+            background-color: #d1fae5;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .payment-method-btn[data-method="wxpay"].active i {
+            color: #059669;
+        }
+
+        .payment-method-btn[data-method="wxpay"].active span {
+            color: #065f46;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-[500px]">
+        <!-- 头部 -->
+        <div class="text-center mb-6">
+            <div
+                class="mx-auto h-12 w-12 rounded-lg bg-black flex items-center justify-center mb-4 shadow-md overflow-hidden">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="w-full h-full object-cover">
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight text-gray-900">激活码商城</h1>
+            <p class="text-sm text-gray-500 mt-1">购买 Team 激活码，自动发货并支持订单查询</p>
+        </div>
+
+        <!-- 购买区块容器 -->
+        <div id="purchase-section">
+            <!-- 购买区域 -->
+            <div class="shadcn-card p-6 shadow-sm mb-6 relative">
+
+                <!-- Team 激活码内容 -->
+                <div id="content-team">
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700">当前库存</span>
+                            <span id="stock-count-team" class="text-lg font-bold text-green-600">--</span>
+                        </div>
+                        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div id="stock-bar-team" class="h-full bg-green-500 transition-all" style="width: 0%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i class="fa-solid fa-check-circle text-green-500 mr-1"></i>
+                            自动发货，购买后获得激活码，支持加入Team团队
+                        </p>
+
+                        <!-- 重要提示 -->
+                        <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
+                            <i class="fa-solid fa-circle-info text-amber-500 mt-0.5"></i>
+                            <div class="text-xs text-amber-700 font-medium">
+                                次抛，可用codex进行编程和网页版的pro模型，无质保。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="purchase-footer-details">
+                    <div class="h-px bg-gray-100 my-6"></div>
+
+                    <div class="space-y-4">
+                        <!-- 支付方式选择 -->
+                        <div>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">选择支付方式</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button type="button" class="payment-method-btn active" data-method="alipay">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <i class="fa-brands fa-alipay text-xl"></i>
+                                        <span class="font-medium">支付宝</span>
+                                    </div>
+                                </button>
+                                <button type="button" class="payment-method-btn" data-method="wxpay">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <i class="fa-brands fa-weixin text-xl"></i>
+                                        <span class="font-medium">微信支付</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 价格明细 -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-blue-900">商品售价</span>
+                                    <span class="font-mono text-blue-700" id="base-price">¥ --</span>
+                                </div>
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-blue-900">手续费 <span id="fee-rate-display">(--%)</span></span>
+                                    <span class="font-mono text-blue-700" id="fee-amount">¥ --</span>
+                                </div>
+                                <div class="h-px bg-blue-200"></div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-blue-900">最终价格</span>
+                                    <span class="text-2xl font-bold text-blue-600" id="final-price">¥ --</span>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-blue-200">
+                                <p class="text-xs text-blue-600 flex items-start gap-1">
+                                    <i class="fa-solid fa-circle-info mt-0.5"></i>
+                                    <span>购买后自动发货，请在下方查询订单获取激活码</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="no-stock-warning"
+                            class="hidden p-3 rounded-md bg-red-50 text-red-600 border border-red-100 text-xs font-medium flex items-center gap-2">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span>当前库存不足，请稍后再试</span>
+                        </div>
+
+                        <button id="buy-btn" class="shadcn-btn shadcn-btn-success w-full h-12 text-base font-semibold">
+                            <i class="fa-solid fa-cart-shopping mr-2"></i>
+                            立即购买
+                        </button>
+
+                        <!-- 倒计时提示 -->
+                        <div id="order-countdown"
+                            class="hidden mt-4 p-3 rounded-md bg-orange-50 border border-orange-200">
+                            <div class="flex items-center justify-between text-sm mb-2">
+                                <span class="text-orange-900 font-medium">订单号：</span>
+                                <span id="countdown-order-id" class="font-mono text-xs text-orange-700">-</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-sm">
+                                <i class="fa-solid fa-clock text-orange-600"></i>
+                                <span class="text-orange-900 font-medium">剩余支付时间：</span>
+                                <span id="countdown-timer" class="font-mono font-bold text-orange-600">--:--</span>
+                            </div>
+                            <p class="text-xs text-orange-600 mt-2">超时后订单将自动取消，库存将重新释放</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- 订单查询区域 -->
+        <div id="query-order-section" class="shadcn-card p-6 shadow-sm mb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">查询订单</h3>
+            <div class="space-y-3">
+                <input type="text" id="order-id-input" placeholder="请输入订单号进行查询" class="shadcn-input font-mono"
+                    maxlength="30">
+                <div class="flex gap-2">
+                    <button id="query-btn" class="shadcn-btn shadcn-btn-primary flex-1">
+                        <i class="fa-solid fa-search mr-2"></i>
+                        查询订单
+                    </button>
+                    <button id="history-btn" class="shadcn-btn bg-gray-600 text-white hover:bg-gray-700 px-4"
+                        title="查看历史订单">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 查询结果 -->
+            <div id="order-result" class="hidden mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">订单号:</span>
+                        <span class="font-mono font-semibold" id="result-order-id">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">金额:</span>
+                        <span class="font-semibold" id="result-amount">-</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">状态:</span>
+                        <span id="result-status" class="font-semibold">-</span>
+                    </div>
+                    <div id="result-countdown-wrapper" class="hidden">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">剩余时间:</span>
+                            <span id="result-countdown" class="font-mono font-semibold text-orange-600">-</span>
+                        </div>
+                    </div>
+                    <div id="result-cancel-wrapper" class="hidden">
+                        <div class="mt-3">
+                            <button onclick="cancelOrder()" id="cancel-order-btn"
+                                class="shadcn-btn bg-red-600 text-white hover:bg-red-700 w-full text-xs">
+                                <i class="fa-solid fa-xmark mr-1"></i>
+                                取消订单
+                            </button>
+                        </div>
+                    </div>
+                    <div id="result-code-wrapper" class="hidden">
+                        <div class="h-px bg-gray-200 my-3"></div>
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <div class="text-xs text-green-600 mb-1">您的激活码</div>
+                            <div class="font-mono text-lg font-bold text-green-700 break-all" id="result-code">-
+                            </div>
+                            <button onclick="copyCode()"
+                                class="mt-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 transition-colors w-full">
+                                <i class="fa-regular fa-copy mr-1"></i> 一键复制
+                            </button>
+                        </div>
+
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">创建时间:</span>
+                        <span class="text-xs" id="result-created">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="query-error"
+                class="hidden mt-4 p-3 rounded-md bg-red-50 text-red-600 border border-red-100 text-xs font-medium text-center">
+            </div>
+        </div>
+
+        <!-- 返回按钮 -->
+        <div class="text-center" id="back-btn-container">
+            <a href="/" id="back-btn"
+                class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>返回首页</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 历史订单弹窗 -->
+    <div id="history-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        onclick="hideOrderHistory()">
+        <div class="shadcn-card bg-white w-full max-w-sm p-4 shadow-lg" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-sm font-semibold text-gray-900">历史订单</div>
+                <button id="clear-history-btn" type="button"
+                    class="shadcn-btn shadcn-btn-outline text-xs px-3 py-1 font-medium text-gray-600 border border-gray-200 hover:bg-gray-50"
+                    title="清空本地历史订单">
+                    <i class="fa-solid fa-trash mr-1"></i>
+                    清空
+                </button>
+            </div>
+            <div id="history-list" class="space-y-1 max-h-64 overflow-y-auto"></div>
+        </div>
+    </div>
+
+
+
+    <script>
+        let currentOrderId = null;
+        let currentQueryOrderId = null;
+        let countdownInterval = null;
+        let queryCountdownInterval = null;
+        let orderTimeout = 1800;
+        let selectedPaymentMethod = 'alipay';
+
+        let stockData = { count: 0, price: 0, fee_rate: 0, fee_amount: 0, final_price: 0 };
+
+        function updatePriceDisplay() {
+            const data = stockData;
+            if (!data) return;
+            document.getElementById('base-price').textContent = '¥ ' + data.price.toFixed(2);
+            document.getElementById('fee-rate-display').textContent = '(' + (data.fee_rate * 100).toFixed(0) + '%)';
+            document.getElementById('fee-amount').textContent = '¥ ' + data.fee_amount.toFixed(2);
+            document.getElementById('final-price').textContent = '¥ ' + data.final_price.toFixed(2);
+
+            const buyBtn = document.getElementById('buy-btn');
+            const warning = document.getElementById('no-stock-warning');
+
+            if (data.mother_account_available === false) {
+                buyBtn.disabled = true;
+                buyBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                warning.classList.remove('hidden');
+                warning.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i><span>母号已翻车，暂时无法售卖</span>';
+            } else if (data.count <= 0) {
+                buyBtn.disabled = true;
+                buyBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                warning.classList.remove('hidden');
+                warning.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i><span>当前库存不足，请稍后再试</span>';
+            } else {
+                buyBtn.disabled = false;
+                buyBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                warning.classList.add('hidden');
+            }
+        }
+
+        // 加载库存
+        async function loadStock() {
+            try {
+                const teamResp = await fetch('/api/stock/count');
+                const teamData = await teamResp.json();
+
+                if (teamData.success) {
+                    stockData = teamData;
+                    document.getElementById('stock-count-team').textContent = teamData.count;
+                    const percent = Math.min(100, (teamData.count / 50) * 100);
+                    document.getElementById('stock-bar-team').style.width = percent + '%';
+                    
+                    // 检查母号状态
+                    const buyBtn = document.getElementById('buy-btn');
+                    const warning = document.getElementById('no-stock-warning');
+                    
+                    if (!teamData.mother_account_available) {
+                        // 母号不可用，禁用购买按钮
+                        buyBtn.disabled = true;
+                        buyBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        warning.classList.remove('hidden');
+                        warning.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i><span>母号已翻车，暂时无法售卖</span>';
+                    } else if (teamData.count <= 0) {
+                        // 库存不足
+                        buyBtn.disabled = true;
+                        buyBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        warning.classList.remove('hidden');
+                        warning.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i><span>当前库存不足，请稍后再试</span>';
+                    } else {
+                        // 正常状态
+                        buyBtn.disabled = false;
+                        buyBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        warning.classList.add('hidden');
+                    }
+                }
+
+                updatePriceDisplay();
+
+            } catch (err) {
+                console.error('加载库存失败', err);
+            }
+        }
+
+        // 购买逻辑
+        document.getElementById('buy-btn').addEventListener('click', async function () {
+            const btn = this;
+            const original = btn.innerHTML;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> 处理中...';
+
+            try {
+                const formData = new FormData();
+                formData.append('method', selectedPaymentMethod);
+
+                const resp = await fetch('/api/buy/create', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await resp.json();
+
+                if (result.success) {
+                    currentOrderId = result.order_id;
+                    saveOrderToHistory(result.order_id);
+                    window.location.href = result.payment_url;
+                } else if (result.code === 'HAS_PENDING_ORDER') {
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                    if (await Modal.confirm(result.message, '继续支付')) {
+                        window.location.href = result.payment_url;
+                    }
+                } else {
+                    Modal.error(result.message || '创建订单失败');
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                }
+            } catch (err) {
+                Modal.error('网络错误，请重试');
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        });
+
+
+
+        async function copyText(text) {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                }
+                // 轻提示
+                const el = document.createElement('div');
+                el.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 text-white px-3 py-1 rounded text-sm z-[60]';
+                el.textContent = '已复制';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1000);
+            } catch (err) {
+                console.error('复制失败', err);
+            }
+        }
+
+        async function copyCode() {
+            const code = document.getElementById('result-code').textContent;
+            await copyText(code);
+        }
+
+        // ========== 初始化 ==========
+
+        // 支付方式选择
+        document.querySelectorAll('.payment-method-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.payment-method-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                selectedPaymentMethod = this.getAttribute('data-method');
+            });
+        });
+
+        // 历史订单相关
+        function getOrderHistory() {
+            try { return JSON.parse(localStorage.getItem('orderHistory') || '[]'); } catch (e) { return []; }
+        }
+
+        function saveOrderToHistory(orderId) {
+            try {
+                let orders = getOrderHistory();
+                // Check if already exists (handle both string and object)
+                const exists = orders.some(o => (typeof o === 'string' ? o : o.id) === orderId);
+                if (!exists) {
+                    orders.unshift({ id: orderId, time: Date.now() });
+                    if (orders.length > 20) orders = orders.slice(0, 20);
+                    localStorage.setItem('orderHistory', JSON.stringify(orders));
+                }
+            } catch (e) { }
+        }
+
+        async function selectHistoryOrder(id) {
+            document.getElementById('order-id-input').value = id;
+            hideOrderHistory();
+            await copyText(id);
+        }
+
+        document.getElementById('history-btn').addEventListener('click', () => {
+            const list = document.getElementById('history-list');
+            let orders = getOrderHistory();
+
+            // Normalize and Sort
+            orders = orders.map(item => {
+                if (typeof item === 'string') return { id: item, time: 0 };
+                return item;
+            }).sort((a, b) => b.time - a.time);
+
+            if (!orders.length) list.innerHTML = '<div class="text-xs text-gray-400">暂无历史订单</div>';
+            else {
+                list.innerHTML = orders.map(item => {
+                    let timeStr = '';
+                    if (item.time) {
+                        const d = new Date(item.time);
+                        // simple format: MM-DD HH:mm
+                        const m = (d.getMonth() + 1).toString().padStart(2, '0');
+                        const day = d.getDate().toString().padStart(2, '0');
+                        const h = d.getHours().toString().padStart(2, '0');
+                        const min = d.getMinutes().toString().padStart(2, '0');
+                        timeStr = `${m}-${day} ${h}:${min}`;
+                    }
+                    return `
+                    <button class="w-full text-left font-mono text-sm px-3 py-2 rounded-md hover:bg-gray-100 flex justify-between items-center group" 
+                        onclick="selectHistoryOrder('${item.id}')">
+                        <span class="text-gray-700 group-hover:text-black">${item.id}</span>
+                        <span class="text-xs text-gray-400 font-sans">${timeStr}</span>
+                    </button>`;
+                }).join('');
+            }
+            document.getElementById('history-modal').classList.remove('hidden');
+        });
+
+        document.getElementById('clear-history-btn').addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (await Modal.confirm('确认清空？', '清空历史')) {
+                localStorage.removeItem('orderHistory');
+                document.getElementById('history-list').innerHTML = '<div class="text-xs text-gray-400">暂无历史订单</div>';
+                hideOrderHistory();
+            }
+        });
+
+        function hideOrderHistory() {
+            document.getElementById('history-modal').classList.add('hidden');
+        }
+
+        // 查询订单
+        document.getElementById('query-btn').addEventListener('click', async function () {
+            const orderId = document.getElementById('order-id-input').value.trim();
+            if (!orderId) {
+                document.getElementById('query-error').textContent = '请输入订单号';
+                document.getElementById('query-error').classList.remove('hidden');
+                return;
+            }
+
+            const btn = this;
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> 查询中...';
+
+            document.getElementById('order-result').classList.add('hidden');
+            document.getElementById('query-error').classList.add('hidden');
+
+            try {
+                const formData = new FormData();
+                formData.append('order_id', orderId);
+                const resp = await fetch('/api/buy/query', { method: 'POST', body: formData });
+                const result = await resp.json();
+
+                if (result.success) {
+                    const order = result.order;
+                    currentQueryOrderId = order.order_id;
+                    stopQueryCountdown();
+
+                    document.getElementById('result-order-id').textContent = order.order_id;
+                    document.getElementById('result-amount').textContent = '¥ ' + order.amount.toFixed(2);
+                    document.getElementById('result-created').textContent = order.created_at;
+
+                    const statusEl = document.getElementById('result-status');
+
+                    if (order.status === 'success') {
+                        statusEl.textContent = '已支付';
+                        statusEl.className = 'font-semibold text-green-600';
+                        if (order.code) {
+                            document.getElementById('result-code').textContent = order.code;
+                            document.getElementById('result-code-wrapper').classList.remove('hidden');
+
+
+
+                        }
+                        document.getElementById('result-countdown-wrapper').classList.add('hidden');
+                        document.getElementById('result-cancel-wrapper').classList.add('hidden');
+                    } else if (order.status === 'pending') {
+                        statusEl.textContent = '待支付';
+                        statusEl.className = 'font-semibold text-orange-600';
+                        document.getElementById('result-code-wrapper').classList.add('hidden');
+                        document.getElementById('result-cancel-wrapper').classList.remove('hidden');
+
+                        if (order.remaining_time > 0) {
+                            document.getElementById('result-countdown-wrapper').classList.remove('hidden');
+                            startQueryCountdown(order.remaining_time);
+                        }
+                    } else {
+                        statusEl.textContent = order.status === 'fail' ? '已取消' : '支付失败';
+                        statusEl.className = 'font-semibold text-red-600';
+                        document.getElementById('result-code-wrapper').classList.add('hidden');
+                        document.getElementById('result-countdown-wrapper').classList.add('hidden');
+                        document.getElementById('result-cancel-wrapper').classList.add('hidden');
+                    }
+
+                    document.getElementById('order-result').classList.remove('hidden');
+                } else {
+                    document.getElementById('query-error').textContent = result.message || '订单不存在';
+                    document.getElementById('query-error').classList.remove('hidden');
+                }
+            } catch (err) {
+                document.getElementById('query-error').textContent = '网络错误';
+                document.getElementById('query-error').classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        });
+
+        // 倒计时相关
+        function formatTime(s) {
+            if (s <= 0) return "00:00";
+            return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+        }
+
+        function startQueryCountdown(remaining) {
+            stopQueryCountdown();
+            const el = document.getElementById('result-countdown');
+            el.textContent = formatTime(remaining);
+            queryCountdownInterval = setInterval(() => {
+                remaining--;
+                el.textContent = formatTime(remaining);
+                if (remaining <= 0) {
+                    stopQueryCountdown();
+                    el.textContent = '已超时';
+                }
+            }, 1000);
+        }
+
+        function stopQueryCountdown() {
+            if (queryCountdownInterval) clearInterval(queryCountdownInterval);
+        }
+
+        async function cancelOrder() {
+            if (!currentQueryOrderId) return;
+            if (!await Modal.confirm('确定要取消此订单吗？', '取消订单')) return;
+
+            const btn = document.getElementById('cancel-order-btn');
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '取消中...';
+
+            try {
+                const formData = new FormData();
+                formData.append('order_id', currentQueryOrderId);
+
+                let resp = await fetch('/api/order/cancel', { method: 'POST', body: formData });
+                let result = await resp.json();
+
+                if (result.success) {
+                    await Modal.success('订单已取消');
+                    document.getElementById('query-btn').click();
+                    loadStock();
+                } else {
+                    await Modal.error(result.message || '取消失败');
+                }
+            } catch (e) {
+                await Modal.error('网络错误');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        }
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStock();
+            setInterval(loadStock, 30000);
+
+            // 检查URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const oid = urlParams.get('order_id');
+            if (oid) {
+                // 如果带有order_id参数，只显示查询订单区块
+                document.getElementById('purchase-section').classList.add('hidden');
+
+                // 修改返回按钮
+                const backBtn = document.getElementById('back-btn');
+                backBtn.href = '/buy';
+                backBtn.querySelector('span').textContent = '返回商城';
+
+                document.getElementById('order-id-input').value = oid;
+                document.getElementById('query-btn').click();
+            }
+        });
+
+    </script>
+</body>
+
+</html>

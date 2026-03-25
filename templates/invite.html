@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ChatGPT Team - 邀请</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['SF Mono', 'Menlo', 'monospace'],
+                    },
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            'from': { opacity: '0' },
+                            'to': { opacity: '1' },
+                        },
+                        slideUp: {
+                            'from': { opacity: '0', transform: 'translateY(10px)' },
+                            'to': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 240 10% 3.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 240 10% 3.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 240 10% 3.9%;
+            --primary: 240 5.9% 10%;
+            --primary-foreground: 0 0% 98%;
+            --secondary: 240 4.8% 95.9%;
+            --secondary-foreground: 240 5.9% 10%;
+            --muted: 240 4.8% 95.9%;
+            --muted-foreground: 240 3.8% 46.1%;
+            --accent: 240 4.8% 95.9%;
+            --accent-foreground: 240 5.9% 10%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 0 0% 98%;
+            --border: 240 5.9% 90%;
+            --input: 240 5.9% 90%;
+            --ring: 240 5.9% 10%;
+            --radius: 0.5rem;
+        }
+
+        body {
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+        }
+
+        .shadcn-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.15s;
+            height: 2.5rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            cursor: pointer;
+        }
+
+        .shadcn-btn:focus-visible {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+        }
+
+        .shadcn-btn:disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .shadcn-btn-primary {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .shadcn-btn-primary:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+
+        .shadcn-btn-secondary {
+            background-color: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+        }
+
+        .shadcn-btn-secondary:hover {
+            background-color: hsl(var(--secondary) / 0.8);
+        }
+
+        .shadcn-card {
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--card));
+            color: hsl(var(--card-foreground));
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-new {
+            background-color: #eff6ff;
+            color: #3b82f6;
+            border: 1px solid #dbeafe;
+        }
+
+        .status-pending {
+            background-color: #fffbeb;
+            color: #d97706;
+            border: 1px solid #fef3c7;
+        }
+
+        .status-in_space {
+            background-color: #ecfdf5;
+            color: #059669;
+            border: 1px solid #d1fae5;
+        }
+
+        .status-expired {
+            background-color: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fee2e2;
+        }
+
+        /* Side Advertisement Styles */
+        .side-ad {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 40;
+        }
+
+        .side-ad-left {
+            left: 20px;
+        }
+
+        .side-ad-right {
+            right: 20px;
+        }
+
+        .ad-wrap {
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .ad-wrap:hover {
+            transform: translateY(-5px);
+        }
+
+        .close-ad {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 24px;
+            height: 24px;
+            background: #374151;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            transition: background 0.2s;
+        }
+
+        .close-ad:hover {
+            background: #111827;
+        }
+
+        @media (max-width: 1280px) {
+            .side-ad {
+                display: none !important;
+            }
+        }
+
+        /* Bottom Advertisement Styles */
+        .bottom-ad-container {
+            display: none;
+            margin-top: 2rem;
+            width: 100%;
+            max-width: 468px;
+            margin-left: auto;
+            margin-right: auto;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        @media (max-width: 1280px) {
+            .bottom-ad-container {
+                display: flex;
+            }
+        }
+
+        .bottom-ad-banner {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 468 / 60;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .bottom-ad-close {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 18px;
+            height: 18px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 10;
+        }
+
+        /* Adblock Fallback Style */
+        .ad-fallback {
+            position: absolute;
+            inset: 0;
+            background: #f3f4f6;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px;
+            color: #6b7280;
+            font-size: 12px;
+            line-height: 1.4;
+            border-radius: inherit;
+        }
+
+        .ad-blocked .ad-fallback {
+            display: flex;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+    <!-- Left Ad: Roxy Browser -->
+    <div id="ad-left" class="side-ad side-ad-left">
+        <div class="ad-wrap">
+            <div class="close-ad" onclick="document.getElementById('ad-left').style.display='none'">&times;</div>
+            <a href="https://roxybrowser.com?code=01171UMA" target="_blank" class="block">
+                <img src="https://roxybrowser.com/banner_picture_new/link_c/zh/160_660_1x.png" alt="Roxy Browser"
+                    srcset="https://roxybrowser.com/banner_picture_new/link_c/zh/160_660_1x.png 1x, https://roxybrowser.com/banner_picture_new/link_c/zh/160_660_2x.png 2x"
+                    class="w-[160px] rounded-xl shadow-lg border border-gray-100"
+                    onerror="this.parentElement.parentElement.classList.add('ad-blocked')">
+                <div class="ad-fallback w-[160px] h-[660px]">
+                    <i class="fa-solid fa-face-frown text-2xl mb-2"></i>
+                    <p class="font-medium">请关闭拦截工具<br>Please disable Adblock</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Right Ad: Cliproxy -->
+    <div id="ad-right" class="side-ad side-ad-right">
+        <div class="ad-wrap w-[160px]">
+            <div class="close-ad" onclick="document.getElementById('ad-right').style.display='none'">&times;</div>
+            <a href="https://share.cliproxy.com/share/qk4yfn6pn" target="_blank"
+                class="group block overflow-hidden rounded-2xl bg-[#0F172A] shadow-2xl border border-blue-900/40 h-[660px] flex flex-col">
+                <div class="ad-fallback">
+                    <i class="fa-solid fa-face-frown text-2xl mb-2 text-gray-400"></i>
+                    <p class="font-medium">请关闭拦截工具<br>Please disable Adblock</p>
+                </div>
+                <!-- Header with Gradient -->
+                <div class="bg-gradient-to-br from-blue-600 to-indigo-900 p-4 text-center shrink-0">
+                    <div class="flex items-center justify-center gap-2 mb-1">
+                        <i class="fa-solid fa-shield-halved text-yellow-400 text-lg"></i>
+                        <span class="font-bold text-white text-lg tracking-tight">Cliproxy</span>
+                    </div>
+                    <p class="text-[9px] text-blue-200 font-bold uppercase tracking-[0.2em]">Global Residential</p>
+                </div>
+
+                <!-- Content - Distributed for 660px height -->
+                <div class="p-3 flex-grow flex flex-col justify-between items-center text-center">
+                    <div class="space-y-6 w-full mt-4">
+                        <div class="space-y-1">
+                            <p class="text-[11px] text-blue-400 font-bold uppercase tracking-wider">IP Resources</p>
+                            <div class="text-white text-base font-black">1亿+</div>
+                            <p class="text-[10px] text-gray-400">全球180+国家覆盖</p>
+                        </div>
+
+                        <div class="h-px bg-blue-900/30 w-12 mx-auto"></div>
+
+                        <div class="space-y-5">
+                            <div class="flex flex-col items-center gap-1">
+                                <i class="fa-solid fa-gauge-high text-blue-400 text-sm"></i>
+                                <span class="text-[10px] text-blue-100 font-medium">无限带宽 / 极速</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1">
+                                <i class="fa-solid fa-microchip text-blue-400 text-sm"></i>
+                                <span class="text-[10px] text-blue-100 font-medium">Socks5/HTTPS</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1">
+                                <i class="fa-solid fa-clock text-blue-400 text-sm"></i>
+                                <span class="text-[10px] text-blue-100 font-medium">24/7 技术支持</span>
+                            </div>
+                        </div>
+
+                        <div class="h-px bg-blue-900/30 w-12 mx-auto"></div>
+
+                        <div class="space-y-1">
+                            <p class="text-[10px] text-gray-400">价格低至</p>
+                            <div class="text-yellow-500 text-lg font-black">$0.032<span
+                                    class="text-[10px] font-normal text-gray-400">/IP</span></div>
+                            <p class="text-[9px] text-blue-300">性价比最高的选择</p>
+                        </div>
+                    </div>
+
+                    <div class="w-full space-y-4 mb-2">
+                        <!-- CTA Button -->
+                        <div class="relative group-hover:transform group-hover:scale-105 transition-all duration-300">
+                            <div
+                                class="absolute -inset-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl blur opacity-30 group-hover:opacity-100 transition duration-500">
+                            </div>
+                            <div
+                                class="relative bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl py-4 px-2 text-center shadow-lg">
+                                <span class="text-black font-black text-xs">立即购买 / 试用</span>
+                            </div>
+                        </div>
+
+                        <div
+                            class="flex flex-wrap justify-center gap-2 opacity-30 grayscale hover:grayscale-0 transition-all">
+                            <i class="fa-brands fa-cc-visa text-white text-[10px]"></i>
+                            <i class="fa-brands fa-cc-mastercard text-white text-[10px]"></i>
+                            <i class="fa-brands fa-bitcoin text-white text-[10px]"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="w-full max-w-lg animate-slide-up">
+
+        <div class="shadcn-card bg-white overflow-hidden shadow-sm">
+            <!-- 头部 -->
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="h-10 w-10 bg-black rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+                        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo"
+                            class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <h1 class="text-base font-semibold text-gray-900 leading-none">ChatGPT Team</h1>
+                        <div id="status-badge" class="status-badge status-new mt-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                            <span>加载中...</span>
+                        </div>
+                    </div>
+                </div>
+                <a href="/logout"
+                    class="h-8 w-8 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-500 transition-colors"
+                    title="退出">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            </div>
+
+            <!-- 满员警告 -->
+            <div id="full-warning" class="hidden bg-red-50 border-b border-red-100 p-3 text-center">
+                <div class="text-red-600 text-sm font-medium flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    当前车位已满
+                </div>
+<div class="text-red-500 text-xs mt-0.5">当前没有可用名额，请等待管理员释放车位后再试</div>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <!-- 车位信息 -->
+                <div id="stats-grid" class="grid grid-cols-3 gap-3">
+                    <div class="p-4 rounded-lg bg-gray-50 border border-gray-100 text-center">
+                        <div class="text-[10px] uppercase font-semibold text-gray-500 mb-1">总车位</div>
+                        <div id="stat-total" class="text-xl font-bold text-gray-900">--</div>
+                    </div>
+                    <div class="p-4 rounded-lg bg-gray-50 border border-gray-100 text-center">
+                        <div class="text-[10px] uppercase font-semibold text-gray-500 mb-1">已上车</div>
+                        <div id="stat-in-use" class="text-xl font-bold text-gray-900">--</div>
+                    </div>
+                    <div class="p-4 rounded-lg bg-gray-50 border border-gray-100 text-center">
+                        <div class="text-[10px] uppercase font-semibold text-gray-500 mb-1">剩余</div>
+                        <div id="stat-available" class="text-xl font-bold text-gray-900">--</div>
+                    </div>
+                </div>
+                <!-- 有效期及说明 -->
+                <div id="active-card" class="p-4 rounded-lg border border-gray-100 bg-white shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-gray-500">
+                            <i class="fa-regular fa-calendar text-sm"></i>
+                            <span class="text-sm font-medium">开号时间</span>
+                        </div>
+                        <div id="active-start" class="text-sm font-semibold text-gray-900">--</div>
+                    </div>
+
+                    <div class="text-xs text-gray-400 text-center leading-relaxed">
+                        预计可用 25-35 天 · 官方封号会提前结束。
+                    </div>
+
+                    {% if config.GROUP_URL or config.CUSTOMER_SERVICE_URL %}
+                    <div class="pt-3 border-t border-gray-100 flex items-center justify-center gap-3">
+                        {% if config.GROUP_URL %}
+                        <button onclick="toggleModal('group-modal', true)"
+                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-xs font-medium text-gray-600 hover:bg-white hover:text-black transition-all shadow-sm">
+                            <i class="fa-brands fa-qq text-[#12B7F5]"></i>
+                            交流群
+                        </button>
+                        {% endif %}
+                        {% if config.CUSTOMER_SERVICE_URL %}
+                        <button onclick="toggleModal('service-modal', true)"
+                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-xs font-medium text-gray-600 hover:bg-white hover:text-black transition-all shadow-sm">
+                            <i class="fa-solid fa-headset text-green-500"></i>
+                            客服支持
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- 用户信息 -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">绑定邮箱</span>
+                        <span id="user-email"
+                            class="font-mono text-gray-900 font-medium bg-gray-50 px-2 py-0.5 rounded">{{ user_email
+                            }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">激活码</span>
+                        <span id="user-code"
+                            class="font-mono text-gray-600 bg-gray-50 px-2 py-0.5 rounded cursor-pointer hover:bg-gray-100 transition-colors"
+                            onclick="copyToClipboard('{{ activation_code }}')" title="点击复制">
+                            {{ activation_code }}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">已绑定车队</span>
+                        <span id="bound-team"
+                            class="font-mono text-gray-900 font-medium bg-gray-50 px-2 py-0.5 rounded text-xs select-all">
+                            {{ bound_team_prefix }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="h-px bg-gray-100"></div>
+
+                <!-- 操作区 -->
+                <div id="action-area" class="min-h-[120px] flex flex-col justify-center">
+                    <!-- 根据状态显示不同内容 -->
+                </div>
+
+                <!-- 消息提示 -->
+                <div id="message" class="hidden p-3 rounded-md text-sm text-center animate-fade-in"></div>
+            </div>
+
+            <!-- 底部 -->
+            <div id="footer-refresh" class="bg-gray-50 p-3 text-center border-t border-gray-100">
+                <div class="text-[10px] text-gray-400 flex items-center justify-center gap-2">
+                    <span>上次更新: <span id="update-time">--</span></span>
+                    <span class="text-gray-300">|</span>
+                    <span>下次刷新: <span id="countdown" class="font-mono">60s</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Responsive Bottom Ads -->
+        <div class="bottom-ad-container">
+            <!-- Roxy Bottom Ad -->
+            <div id="ad-bottom-left" class="bottom-ad-banner">
+                <div class="bottom-ad-close" onclick="this.parentElement.style.display='none'">&times;</div>
+                <a href="https://roxybrowser.com?code=01171UMA" target="_blank" class="block w-full h-full">
+                    <img src="https://roxybrowser.com/banner_picture_new/link_c/zh/468_60_1x.png" alt="Roxy Browser"
+                        srcset="https://roxybrowser.com/banner_picture_new/link_c/zh/468_60_1x.png 1x, https://roxybrowser.com/banner_picture_new/link_c/zh/468_60_2x.png 2x"
+                        class="w-full h-full object-cover"
+                        onerror="this.parentElement.parentElement.classList.add('ad-blocked')">
+                    <div class="ad-fallback h-[60px]">
+                        <p class="font-medium">请关闭拦截工具 = Please disable Adblock</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Cliproxy Bottom Ad (Custom Designed 468x60) -->
+            <div id="ad-bottom-right" class="bottom-ad-banner bg-[#0F172A] border-blue-900/30">
+                <div class="bottom-ad-close" onclick="this.parentElement.style.display='none'">&times;</div>
+                <a href="https://share.cliproxy.com/share/qk4yfn6pn" target="_blank"
+                    class="flex items-center w-full h-full">
+                    <div class="ad-fallback h-[60px] bg-[#0F172A] text-gray-400 border-blue-900/30">
+                        <p class="font-medium">请关闭拦截工具 = Please disable Adblock</p>
+                    </div>
+                    <!-- Left Section: Brand -->
+                    <div
+                        class="w-1/4 h-full bg-gradient-to-br from-blue-600 to-indigo-900 flex flex-col items-center justify-center shrink-0">
+                        <span class="text-white font-black text-sm tracking-tighter">Cliproxy</span>
+                        <span class="text-[7px] text-blue-200 uppercase tracking-widest font-bold">Proxy</span>
+                    </div>
+                    <!-- Middle Section: Features -->
+                    <div class="flex-grow px-3 flex items-center justify-between overflow-hidden">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] text-white font-bold leading-tight">1亿+ 全球住宅IP</span>
+                            <span class="text-[8px] text-gray-400 font-medium">无限带宽 · 稳定快速</span>
+                        </div>
+                        <div class="hidden sm:flex flex-col items-end">
+                            <span class="text-[10px] text-yellow-500 font-black">低至 $0.032/IP</span>
+                            <span class="text-[7px] text-blue-400 uppercase font-black">Socks5/HTTPS</span>
+                        </div>
+                    </div>
+                    <!-- Right Section: CTA -->
+                    <div class="px-3 shrink-0">
+                        <div class="bg-gradient-to-r from-yellow-500 to-orange-500 rounded px-2 py-1 shadow-sm">
+                            <span class="text-black font-black text-[9px] whitespace-nowrap">立即购买</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 交流群弹窗 -->
+    <div id="group-modal"
+        class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+        <div class="bg-white rounded-2xl w-full max-w-[320px] shadow-2xl overflow-hidden animate-slide-up">
+            <div class="p-6 text-center">
+                <div
+                    class="mx-auto h-16 w-16 bg-[#12B7F5]/10 text-[#12B7F5] rounded-full flex items-center justify-center mb-4">
+                    <i class="fa-brands fa-qq text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">交流群信息</h3>
+                <div
+                    class="bg-gray-50 p-4 rounded-xl font-mono text-sm text-gray-700 break-all mb-6 border border-gray-100">
+                    {{ config.GROUP_URL }}
+                </div>
+                <button onclick="toggleModal('group-modal', false)"
+                    class="shadcn-btn shadcn-btn-primary w-full h-11 rounded-xl bg-[#12B7F5] hover:bg-[#12B7F5]/90 border-none transition-all">
+                    我知道了
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 客服弹窗 -->
+    <div id="service-modal"
+        class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+        <div class="bg-white rounded-2xl w-full max-w-[320px] shadow-2xl overflow-hidden animate-slide-up">
+            <div class="p-6 text-center">
+                <div
+                    class="mx-auto h-16 w-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-4">
+                    <i class="fa-solid fa-headset text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">联系客服</h3>
+                <div
+                    class="bg-gray-50 p-4 rounded-xl font-mono text-sm text-gray-700 break-all mb-6 border border-gray-100">
+                    {{ config.CUSTOMER_SERVICE_URL }}
+                </div>
+                <button onclick="toggleModal('service-modal', false)"
+                    class="shadcn-btn shadcn-btn-primary w-full h-11 rounded-xl bg-green-600 hover:bg-green-700 border-none transition-all">
+                    我知道了
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function toggleModal(id, show) {
+            const modal = document.getElementById(id);
+            if (show) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }
+        }
+
+        // 传入的数据
+        const USER_EMAIL = '{{ user_email }}';
+        const ACTIVATION_CODE = '{{ activation_code }}';
+        const INITIAL_STATUS = '{{ invite_status }}';
+
+        let currentStatus = INITIAL_STATUS || 'new';
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage('复制成功', 'success');
+                setTimeout(hideMessage, 2000);
+            }).catch(() => {
+                showMessage('复制失败，请手动选择复制', 'error');
+            });
+        }
+
+        function formatDate(ts) {
+            if (!ts) return '--';
+            const d = new Date(typeof ts === 'number' ? ts * 1000 : ts);
+            return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        function showMessage(text, type = 'info') {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = 'hidden p-3 rounded-md text-sm text-center animate-fade-in mb-4 '; // Reset + base
+
+            if (type === 'success') msg.className += 'bg-green-50 text-green-700 border border-green-100';
+            else if (type === 'error') msg.className += 'bg-red-50 text-red-700 border border-red-100';
+            else msg.className += 'bg-blue-50 text-blue-700 border border-blue-100';
+
+            msg.classList.remove('hidden');
+        }
+
+        function hideMessage() {
+            document.getElementById('message').classList.add('hidden');
+        }
+
+        function updateStatus(status) {
+            currentStatus = status;
+            const badge = document.getElementById('status-badge');
+            const actionArea = document.getElementById('action-area');
+            const fullWarning = document.getElementById('full-warning');
+            const statsGrid = document.getElementById('stats-grid');
+            const activeCard = document.getElementById('active-card');
+            const footerRefresh = document.getElementById('footer-refresh');
+            const hideStats = status === 'expired';
+            if (fullWarning) fullWarning.classList.toggle('hidden', hideStats);
+            if (statsGrid) statsGrid.classList.toggle('hidden', hideStats);
+            if (activeCard) activeCard.classList.toggle('hidden', hideStats);
+            if (footerRefresh) footerRefresh.classList.toggle('hidden', hideStats);
+            if (hideStats) {
+                const availableEl = document.getElementById('stat-available');
+                if (availableEl) availableEl.classList.remove('text-red-500');
+            }
+
+            badge.className = 'status-badge ';
+
+            if (status === 'in_space') {
+                badge.className += 'status-in_space';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-current"></span><span>已在空间中</span>';
+                actionArea.innerHTML = `
+                    <div class="text-center">
+                        <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 mb-3">
+                            <i class="fa-solid fa-check text-xl"></i>
+                        </div>
+                        <h3 class="text-base font-semibold text-gray-900">已成功加入</h3>
+                        <p class="text-sm text-gray-500 mt-1 mb-4">您已在 ChatGPT Team 空间中</p>
+                        <a href="https://chatgpt.com/" target="_blank" 
+                            class="shadcn-btn shadcn-btn-secondary w-full gap-2 border border-gray-200">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                            打开 ChatGPT
+                        </a>
+                    </div>
+                `;
+            } else if (status === 'pending') {
+                badge.className += 'status-pending';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span><span>待处理邀请</span>';
+                actionArea.innerHTML = `
+                    <div class="text-center">
+                        <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 text-amber-600 mb-3">
+                            <i class="fa-solid fa-envelope text-xl"></i>
+                        </div>
+                        <h3 class="text-base font-semibold text-gray-900">邀请已发送</h3>
+                        <p class="text-sm text-gray-500 mt-1">请前往邮箱 <strong>${USER_EMAIL}</strong> 接受邀请</p>
+                        <p class="text-xs text-gray-400 mt-1 mb-4">(如未收到请检查垃圾箱)</p>
+                        <button onclick="checkStatus()" class="shadcn-btn shadcn-btn-secondary w-full gap-2 border border-gray-200">
+                            <i class="fa-solid fa-rotate"></i>
+                            刷新状态
+                        </button>
+                    </div>
+                `;
+            } else if (status === 'expired') {
+                badge.className += 'status-expired';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-current"></span><span>激活码失效</span>';
+                actionArea.innerHTML = `
+                    <div class="text-center">
+                        <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 mb-3">
+                            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                        </div>
+                        <h3 class="text-base font-semibold text-gray-900">车位不可用</h3>
+                        <p class="text-sm text-red-500 mt-2 font-medium">该激活码绑定的车位无法连接或已翻车，请重新购买</p>
+                        <div class="mt-6 border-t pt-4">
+                            <p class="text-xs text-gray-400">如有疑问请联系管理员</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                badge.className += 'status-new';
+                badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-current"></span><span>待发送邀请</span>';
+                actionArea.innerHTML = `
+                    <button id="invite-btn" onclick="sendInvite()" 
+                        class="shadcn-btn shadcn-btn-primary w-full h-11 text-base shadow-sm hover:shadow-md transition-all gap-2">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                        <span>发送邀请到邮箱</span>
+                    </button>
+                    <p class="text-center text-xs text-gray-400 mt-3">邀请将发送至: ${USER_EMAIL}</p>
+                `;
+            }
+        }
+
+        function loadStats() {
+            if (currentStatus === 'expired') return;
+            fetch('/stats')
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) return;
+
+                    const d = data.data || {};
+                    const localBoarding = data.local_boarding || {};
+                    const userHasSeat = data.user_has_seat || false;  // 用户是否已占位
+
+                    const total = d.seats_entitled || 0;
+                    const inUse = d.seats_in_use || 0;
+
+                    // 修正逻辑：占用 = API已入位 + API 待接收(pending) + 本地已绑定未邀请(new)
+                    const apiPending = d.pending_invites || 0;
+                    const localNew = localBoarding.waiting_invite || 0;
+                    let totalOccupied = inUse + apiPending + localNew;
+                    
+        const actualAvailable = Math.max(0, total - totalOccupied);
+
+        document.getElementById('stat-total').textContent = total;
+        document.getElementById('stat-in-use').textContent = totalOccupied;
+        document.getElementById('stat-available').textContent = actualAvailable;
+        document.getElementById('active-start').textContent = formatDate(d.active_start);
+
+                    if (data.updated_at) {
+                        document.getElementById('update-time').textContent = data.updated_at;
+                    }
+
+        // 满员/超员警告 - 展示真实剩余，但用户已占位时允许继续给自己发邀请
+        const fullWarning = document.getElementById('full-warning');
+        const isOverCapacity = totalOccupied > total;
+        const shouldShowWarning = (actualAvailable <= 0 || isOverCapacity) && !userHasSeat;
+                    
+                    if (shouldShowWarning) {
+                        fullWarning.classList.remove('hidden');
+                        document.getElementById('stat-available').classList.add('text-red-500');
+                    } else {
+                        fullWarning.classList.add('hidden');
+                        document.getElementById('stat-available').classList.remove('text-red-500');
+                    }
+                });
+        }
+
+        async function sendInvite() {
+            const btn = document.getElementById('invite-btn');
+            if (!btn) return;
+
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> 发送中...';
+            hideMessage();
+
+            try {
+                const resp = await fetch('/api/invite', { method: 'POST' });
+                const result = await resp.json();
+
+                if (result.success) {
+                    showMessage(result.message, 'success');
+                    updateStatus(result.status || 'pending');
+                    loadStats();
+                } else {
+                    showMessage(result.message || '发送失败', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                }
+            } catch (err) {
+                showMessage('网络错误，请重试', 'error');
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        }
+
+        async function checkStatus() {
+            // Add spin animation to the refresh button icon if it exists
+            const btn = document.querySelector('button[onclick="checkStatus()"] i');
+            if (btn) btn.classList.add('fa-spin');
+
+            try {
+                const resp = await fetch('/api/check-status', { method: 'POST' });
+                const result = await resp.json();
+                if (result.success) {
+                    updateStatus(result.status);
+                    showMessage(result.message, result.status === 'in_space' ? 'success' : 'info');
+                }
+            } catch (err) {
+                showMessage('检查状态失败', 'error');
+            }
+        }
+
+        // ============ 静默检测 (节省代理流量) ============
+        let lastActivityTime = Date.now();
+        const INACTIVE_LIMIT = 2 * 60 * 1000; // 2 分钟无操作视为挂机
+
+        // 监听用户活动
+        ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'].forEach(evt => {
+            window.addEventListener(evt, () => { lastActivityTime = Date.now(); }, { passive: true });
+        });
+
+        function isPageActive() {
+            // 页面被隐藏 (切到后台) 或 超过 2 分钟无操作
+            if (document.hidden) return false;
+            if (Date.now() - lastActivityTime > INACTIVE_LIMIT) return false;
+            return true;
+        }
+
+        // 初始化
+        let statsCountdown = 60;
+
+        function updateCountdown() {
+            if (!isPageActive()) {
+                const el = document.getElementById('countdown');
+                el.textContent = '已暂停刷新 (挂机中)';
+                return;
+            }
+
+            const el = document.getElementById('countdown');
+            if (statsCountdown <= 0) {
+                el.textContent = '刷新中...';
+            } else {
+                el.textContent = `${statsCountdown}s`;
+            }
+            statsCountdown--;
+            if (statsCountdown < 0) statsCountdown = 60;
+        }
+
+        updateStatus(currentStatus);
+        loadStats();
+
+        // 每秒更新倒计时
+        setInterval(updateCountdown, 1000);
+
+        // 每60秒刷新数据
+        setInterval(() => {
+            if (isPageActive()) {
+                loadStats();
+                statsCountdown = 60;
+            }
+        }, 60000);
+
+        // Adblock Detection
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const ads = ['ad-left', 'ad-right', 'ad-bottom-left', 'ad-bottom-right'];
+                ads.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && (el.offsetHeight === 0 || window.getComputedStyle(el).display === 'none')) {
+                        el.classList.add('ad-blocked');
+                    }
+                });
+            }, 1000);
+        });
+    </script>
+</body>
+
+</html>

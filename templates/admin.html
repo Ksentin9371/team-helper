@@ -1,0 +1,2907 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理 - Team 邀请助手</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'SF Mono', 'Menlo', 'monospace'],
+                    },
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: {
+                            DEFAULT: "hsl(var(--primary))",
+                            foreground: "hsl(var(--primary-foreground))",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(var(--secondary))",
+                            foreground: "hsl(var(--secondary-foreground))",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(var(--destructive))",
+                            foreground: "hsl(var(--destructive-foreground))",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(var(--muted))",
+                            foreground: "hsl(var(--muted-foreground))",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(var(--accent))",
+                            foreground: "hsl(var(--accent-foreground))",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="{{ url_for('static', filename='modal.js') }}"></script>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 240 10% 3.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 240 10% 3.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 240 10% 3.9%;
+            --primary: 240 5.9% 10%;
+            --primary-foreground: 0 0% 98%;
+            --secondary: 240 4.8% 95.9%;
+            --secondary-foreground: 240 5.9% 10%;
+            --muted: 240 4.8% 95.9%;
+            --muted-foreground: 240 3.8% 46.1%;
+            --accent: 240 4.8% 95.9%;
+            --accent-foreground: 240 5.9% 10%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 0 0% 98%;
+            --border: 240 5.9% 90%;
+            --input: 240 5.9% 90%;
+            --ring: 240 5.9% 10%;
+            --radius: 0.5rem;
+        }
+
+        body {
+            background-color: #f9fafb;
+            color: hsl(var(--foreground));
+        }
+
+        .shadcn-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.15s;
+            height: 2.25rem;
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+            cursor: pointer;
+        }
+
+        .shadcn-btn:focus-visible {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+        }
+
+        .shadcn-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .shadcn-btn-primary {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .shadcn-btn-primary:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+
+        .shadcn-btn-secondary {
+            background-color: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+        }
+
+        .shadcn-btn-secondary:hover {
+            background-color: hsl(var(--secondary) / 0.8);
+        }
+
+        .shadcn-btn-outline {
+            border: 1px solid hsl(var(--border));
+            background-color: transparent;
+        }
+
+        .shadcn-btn-outline:hover {
+            background-color: hsl(var(--accent));
+            color: hsl(var(--accent-foreground));
+        }
+
+        .shadcn-btn-ghost {
+            background-color: transparent;
+        }
+
+        .shadcn-btn-ghost:hover {
+            background-color: hsl(var(--accent));
+            color: hsl(var(--accent-foreground));
+        }
+
+        .shadcn-card {
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--card));
+            color: hsl(var(--card-foreground));
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .shadcn-input {
+            width: 100%;
+            height: 2.5rem;
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--input));
+            background-color: transparent;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            transition: all 0.15s;
+        }
+
+        .shadcn-input:focus-visible {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+            border-color: hsl(var(--ring));
+        }
+
+        /* Tab Styles */
+        .tab-btn {
+            position: relative;
+            color: hsl(var(--muted-foreground));
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: hsl(var(--foreground));
+        }
+
+        .tab-btn.active {
+            color: hsl(var(--foreground));
+            border-bottom-color: hsl(var(--primary));
+        }
+
+        /* Table Styles */
+        th {
+            color: hsl(var(--muted-foreground));
+            font-weight: 500;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            border-top: 1px solid hsl(var(--border));
+        }
+
+        tr:hover td {
+            background-color: hsl(var(--muted) / 0.3);
+        }
+
+        /* Badge Styles */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            padding: 0.125rem 0.625rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .badge-green {
+            background-color: #ecfdf5;
+            color: #059669;
+            border: 1px solid #d1fae5;
+        }
+
+        .badge-zinc {
+            background-color: #f4f4f5;
+            color: #71717a;
+            border: 1px solid #e4e4e7;
+        }
+
+        .badge-red {
+            background-color: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fee2e2;
+        }
+
+        .badge-blue {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #dbeafe;
+        }
+
+        .badge-yellow {
+            background-color: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fef3c7;
+        }
+
+        .badge-purple {
+            background-color: #faf5ff;
+            color: #7e22ce;
+            border: 1px solid #f3e8ff;
+        }
+    </style>
+</head>
+
+<body class="p-4 sm:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-sm overflow-hidden">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo"
+                        class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-foreground">管理后台</h1>
+                    <p class="text-xs text-muted-foreground font-medium">Team 邀请管理系统</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/" class="shadcn-btn shadcn-btn-ghost text-sm gap-2 text-muted-foreground">
+                    <i class="fa-solid fa-home text-xs"></i> 首页
+                </a>
+                <a href="/admin/logout"
+                    class="shadcn-btn shadcn-btn-ghost text-sm gap-2 text-red-600 hover:text-red-700 hover:bg-red-50">
+                    <i class="fa-solid fa-right-from-bracket text-xs"></i> 退出
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-medium text-muted-foreground">车位统计</span>
+                    <span id="stats-countdown"
+                        class="text-xs text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded">--</span>
+                </div>
+                <button onclick="forceRefreshStats()" id="force-refresh-btn"
+                    class="shadcn-btn shadcn-btn-outline text-xs gap-2 h-8">
+                    <i id="force-refresh-icon" class="fa-solid fa-rotate"></i>
+                    刷新缓存
+                </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                <div class="shadcn-card p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-medium text-muted-foreground">已上车</span>
+                        <i class="fa-solid fa-user-check text-muted-foreground text-sm"></i>
+                    </div>
+                    <div class="text-2xl font-bold tracking-tight" id="stat-in-use">-</div>
+                </div>
+                <div class="shadcn-card p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-medium text-muted-foreground">待上车</span>
+                        <i class="fa-solid fa-clock text-muted-foreground text-sm"></i>
+                    </div>
+                    <div class="text-2xl font-bold tracking-tight" id="stat-pending">-</div>
+                </div>
+                <div class="shadcn-card p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-medium text-muted-foreground">总车位</span>
+                        <i class="fa-solid fa-users text-muted-foreground text-sm"></i>
+                    </div>
+                    <div class="text-2xl font-bold tracking-tight" id="stat-total">-</div>
+                </div>
+                <div class="shadcn-card p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-medium text-muted-foreground">剩余名额</span>
+                        <i class="fa-solid fa-ticket text-muted-foreground text-sm"></i>
+                    </div>
+                    <div class="text-2xl font-bold tracking-tight" id="stat-available">-</div>
+                </div>
+                <div class="shadcn-card p-6 bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-medium text-purple-600">全站累计邀请</span>
+                        <i class="fa-solid fa-chart-line text-purple-500 text-sm"></i>
+                    </div>
+                    <div class="text-2xl font-bold tracking-tight text-purple-700" id="stat-global-invited">-</div>
+                    <div class="text-[10px] text-purple-500 mt-1" id="stat-current-team-invited">当前母号: -</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex items-center gap-6 mb-6 border-b border-border overflow-x-auto">
+            <button onclick="switchTab('activation')" id="tab-btn-activation"
+                class="tab-btn px-1 py-3 text-sm font-medium flex items-center gap-2 active">
+                <i class="fa-solid fa-key text-xs"></i>
+                激活码管理
+                <span id="tab-count-activation"
+                    class="ml-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] text-secondary-foreground hidden">0</span>
+            </button>
+            <button onclick="switchTab('pending')" id="tab-btn-pending"
+                class="tab-btn px-1 py-3 text-sm font-medium flex items-center gap-2">
+                <i class="fa-solid fa-clock text-xs"></i>
+                待处理邀请
+                <span id="tab-count-pending"
+                    class="ml-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] text-secondary-foreground hidden">0</span>
+            </button>
+            <button onclick="switchTab('members')" id="tab-btn-members"
+                class="tab-btn px-1 py-3 text-sm font-medium flex items-center gap-2">
+                <i class="fa-solid fa-users text-xs"></i>
+                成员列表
+                <span id="tab-count-members"
+                    class="ml-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] text-secondary-foreground hidden">0</span>
+            </button>
+            <button onclick="switchTab('records')" id="tab-btn-records"
+                class="tab-btn px-1 py-3 text-sm font-medium flex items-center gap-2">
+                <i class="fa-solid fa-list text-xs"></i>
+                近期活动
+            </button>
+            <button onclick="switchTab('teamconfig')" id="tab-btn-teamconfig"
+                class="tab-btn px-1 py-3 text-sm font-medium flex items-center gap-2">
+                <i class="fa-solid fa-server text-xs"></i>
+                母号管理
+                <span id="tab-count-teamconfig"
+                    class="ml-1 rounded-full bg-green-100 text-green-700 px-2 py-0.5 text-[10px] hidden">0</span>
+            </button>
+            <button onclick="switchTab('stock')" id="tab-btn-stock"
+                class="tab-btn px-1 py-3 text-sm font-medium flex items-center gap-2">
+                <i class="fa-solid fa-box text-xs"></i>
+                库存管理
+                <span id="tab-count-stock"
+                    class="ml-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] text-secondary-foreground hidden">0</span>
+            </button>
+            <button onclick="switchTab('orders')" id="tab-btn-orders"
+                class="tab-btn px-1 py-3 text-sm font-medium flex items-center gap-2">
+                <i class="fa-solid fa-receipt text-xs"></i>
+                订单管理
+                <span id="tab-count-orders"
+                    class="ml-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] text-secondary-foreground hidden">0</span>
+            </button>
+            <button onclick="switchTab('settings')" id="tab-btn-settings"
+                class="tab-btn px-1 py-3 text-sm font-medium flex items-center gap-2">
+                <i class="fa-solid fa-gear text-xs"></i>
+                设置
+            </button>
+            <button onclick="switchTab('logs')" id="tab-btn-logs"
+                class="tab-btn px-1 py-3 text-sm font-medium flex items-center gap-2">
+                <i class="fa-solid fa-terminal text-xs"></i>
+                系统日志
+            </button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="shadcn-card bg-white min-h-[500px] shadow-sm">
+
+            <!-- ACTIVATION CODES -->
+            <div id="tab-content-activation" class="block">
+                <div class="p-4 border-b border-border flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <button onclick="showGenerateModal()" class="shadcn-btn shadcn-btn-primary gap-2 text-xs">
+                            <i class="fa-solid fa-plus"></i> 生成激活码
+                        </button>
+                        <div class="h-6 w-px bg-border mx-2"></div>
+                        <div class="flex items-center gap-3 text-sm">
+                            <span class="text-muted-foreground">总计 <strong class="text-foreground"
+                                    id="activation-stat-total">0</strong></span>
+                            <span class="text-muted-foreground">剩余 <strong class="text-green-600"
+                                    id="activation-stat-unused">0</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <label
+                            class="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                            <input type="checkbox" id="show-used-codes"
+                                class="rounded border-input text-primary focus:ring-primary h-4 w-4"
+                                onchange="applyActivationFilter()">
+                            显示已使用
+                        </label>
+                        <button onclick="loadActivationCodes()" id="refresh-activation-btn"
+                            class="shadcn-btn shadcn-btn-ghost w-8 h-8 p-0">
+                            <i id="refresh-activation-icon" class="fa-solid fa-rotate text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-muted/50">
+                            <tr>
+                                <th class="p-4 w-[240px]">激活码</th>
+                                <th class="p-4 w-[100px]">状态</th>
+                                <th class="p-4">创建/使用时间</th>
+                                <th class="p-4">使用者</th>
+                                <th class="p-4">备注</th>
+                                <th class="p-4 text-right">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activation-body" class="text-sm">
+                            <!-- Rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div id="activation-pagination"
+                    class="p-4 border-t border-border flex items-center justify-end gap-2 hidden">
+                    <button onclick="changePage('activation', -1)" id="activation-prev"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">上一页</button>
+                    <span id="activation-page-info" class="text-xs text-muted-foreground font-mono">1/1</span>
+                    <button onclick="changePage('activation', 1)" id="activation-next"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">下一页</button>
+                </div>
+
+                <div id="activation-empty" class="hidden py-16 text-center text-muted-foreground">
+                    <p>暂无数据</p>
+                </div>
+            </div>
+
+            <!-- PENDING INVITES -->
+            <div id="tab-content-pending" class="hidden">
+                <div class="p-4 border-b border-border flex items-center justify-between">
+                    <h2 class="text-sm font-semibold">待处理邀请</h2>
+                    <button onclick="loadPendingInvites()" id="refresh-pending-btn"
+                        class="shadcn-btn shadcn-btn-ghost w-8 h-8 p-0">
+                        <i id="refresh-pending-icon" class="fa-solid fa-rotate text-xs"></i>
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-muted/50">
+                            <tr>
+                                <th class="p-4">邮箱地址</th>
+                                <th class="p-4">角色</th>
+                                <th class="p-4">邀请时间</th>
+                                <th class="p-4">ID</th>
+                                <th class="p-4 text-right">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-body" class="text-sm">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="pending-pagination"
+                    class="p-4 border-t border-border flex items-center justify-end gap-2 hidden">
+                    <button onclick="changePage('pending', -1)" id="pending-prev"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">上一页</button>
+                    <span id="pending-page-info" class="text-xs text-muted-foreground font-mono">1/1</span>
+                    <button onclick="changePage('pending', 1)" id="pending-next"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">下一页</button>
+                </div>
+                <div id="pending-empty" class="hidden py-16 text-center text-muted-foreground">
+                    <p>暂无待处理邀请</p>
+                </div>
+            </div>
+
+            <!-- MEMBERS -->
+            <div id="tab-content-members" class="hidden">
+                <div class="p-4 border-b border-border flex items-center justify-between">
+                    <h2 class="text-sm font-semibold">空间成员列表</h2>
+                    <button onclick="loadMembers()" id="refresh-members-btn"
+                        class="shadcn-btn shadcn-btn-ghost w-8 h-8 p-0">
+                        <i id="refresh-members-icon" class="fa-solid fa-rotate text-xs"></i>
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-muted/50">
+                            <tr>
+                                <th class="p-4">用户名</th>
+                                <th class="p-4">邮箱地址</th>
+                                <th class="p-4">激活码</th>
+                                <th class="p-4">角色</th>
+                                <th class="p-4">加入时间</th>
+                                <th class="p-4">状态</th>
+                                <th class="p-4 text-right">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="members-body" class="text-sm">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="members-pagination"
+                    class="p-4 border-t border-border flex items-center justify-end gap-2 hidden">
+                    <button onclick="changePage('members', -1)" id="members-prev"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">上一页</button>
+                    <span id="members-page-info" class="text-xs text-muted-foreground font-mono">1/1</span>
+                    <button onclick="changePage('members', 1)" id="members-next"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">下一页</button>
+                </div>
+                <div id="members-empty" class="hidden py-16 text-center text-muted-foreground">
+                    <p>暂无成员</p>
+                </div>
+            </div>
+
+            <!-- RECORDS -->
+            <div id="tab-content-records" class="hidden">
+                <div class="p-4 border-b border-border flex items-center justify-between">
+                    <h2 class="text-sm font-semibold">近期活动记录</h2>
+                    <button onclick="loadRecords()" id="refresh-records-btn"
+                        class="shadcn-btn shadcn-btn-ghost w-8 h-8 p-0">
+                        <i id="refresh-records-icon" class="fa-solid fa-rotate text-xs"></i>
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-muted/50">
+                            <tr>
+                                <th class="p-4 w-[60px]">ID</th>
+                                <th class="p-4">用户</th>
+                                <th class="p-4">邮箱/激活码</th>
+                                <th class="p-4">结果</th>
+                                <th class="p-4">时间/IP</th>
+                            </tr>
+                        </thead>
+                        <tbody id="records-body" class="text-sm">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="records-pagination"
+                    class="p-4 border-t border-border flex items-center justify-end gap-2 hidden">
+                    <button onclick="changePage('records', -1)" id="records-prev"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">上一页</button>
+                    <span id="records-page-info" class="text-xs text-muted-foreground font-mono">1/1</span>
+                    <button onclick="changePage('records', 1)" id="records-next"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">下一页</button>
+                </div>
+                <div id="records-empty" class="hidden py-16 text-center text-muted-foreground">
+                    <p>暂无记录</p>
+                </div>
+            </div>
+
+            <!-- TEAM CONFIGS (母号管理) -->
+            <div id="tab-content-teamconfig" class="hidden">
+                <div class="p-4 border-b border-border flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button onclick="showTeamConfigModal()" class="shadcn-btn shadcn-btn-primary gap-2 text-xs">
+                            <i class="fa-solid fa-plus"></i> 添加母号
+                        </button>
+                        <button onclick="showTeamConfigBulkModal()" class="shadcn-btn shadcn-btn-outline gap-2 text-xs">
+                            <i class="fa-solid fa-file-import"></i> 批量导入
+                        </button>
+                        <span class="text-sm text-muted-foreground">共 <strong id="teamconfig-total"
+                                class="text-foreground">0</strong> 个配置</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label
+                            class="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                            <input type="checkbox" id="show-banned-teamconfig"
+                                class="rounded border-input text-primary focus:ring-primary h-4 w-4"
+                                onchange="applyTeamConfigFilter()">
+                            显示已封禁
+                        </label>
+                        <button onclick="loadTeamConfigs()" id="refresh-teamconfig-btn"
+                            class="shadcn-btn shadcn-btn-ghost w-8 h-8 p-0">
+                            <i id="refresh-teamconfig-icon" class="fa-solid fa-rotate text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-muted/50">
+                            <tr>
+                                <th class="p-4 w-[90px]">状态</th>
+                                <th class="p-4">名称</th>
+                                <th class="p-4">车位情况</th>
+                                <th class="p-4">开号时间</th>
+                                <th class="p-4">数据更新</th>
+                                <th class="p-4 text-right">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamconfig-body" class="text-sm">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="teamconfig-pagination"
+                    class="p-4 border-t border-border flex items-center justify-end gap-2 hidden">
+                    <button onclick="changePage('teamconfig', -1)" id="teamconfig-prev"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">上一页</button>
+                    <span id="teamconfig-page-info" class="text-xs text-muted-foreground font-mono">1/1</span>
+                    <button onclick="changePage('teamconfig', 1)" id="teamconfig-next"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">下一页</button>
+                </div>
+                <div id="teamconfig-empty" class="hidden py-16 text-center text-muted-foreground">
+                    <div class="mb-4"><i class="fa-solid fa-server text-4xl text-muted-foreground/50"></i></div>
+                    <p class="mb-2">暂无母号配置</p>
+                    <p class="text-xs">点击上方"添加母号"按钮创建第一个配置</p>
+                </div>
+            </div>
+
+            <!-- SYSTEM LOGS -->
+            <!-- STOCK MANAGEMENT -->
+            <div id="tab-content-stock" class="hidden">
+                <div class="p-4 border-b border-border flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <button onclick="showAddStockModal()" class="shadcn-btn shadcn-btn-primary gap-2 text-xs">
+                            <i class="fa-solid fa-plus"></i> 添加库存
+                        </button>
+                        <button id="btn-sync-stock" onclick="syncStockCount()"
+                            class="shadcn-btn bg-blue-600 text-white hover:bg-blue-700 gap-2 text-xs">
+                            <i class="fa-solid fa-sync"></i> 同步库存
+                        </button>
+                        <label
+                            class="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground ml-3">
+                            <input type="checkbox" id="show-sold-stock"
+                                class="rounded border-input text-primary focus:ring-primary h-4 w-4"
+                                onchange="applyStockFilter()">
+                            显示已售
+                        </label>
+                        <div class="h-6 w-px bg-border mx-2"></div>
+
+                        <div class="flex items-center gap-3 text-sm">
+                            <span class="text-muted-foreground">总计 <strong class="text-foreground"
+                                    id="stock-stat-total">0</strong></span>
+                            <span class="text-muted-foreground">未售 <strong class="text-green-600"
+                                    id="stock-stat-unsold">0</strong></span>
+                            <span class="text-muted-foreground">已售 <strong class="text-gray-600"
+                                    id="stock-stat-sold">0</strong></span>
+                            <span class="text-muted-foreground">Redis <strong class="text-blue-600"
+                                    id="stock-stat-redis">0</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Batch Actions Bar (Dynamic) -->
+                    <div id="stock-batch-actions" class="hidden flex items-center gap-2 animate-fade-in">
+                        <span class="text-xs font-medium text-blue-600 mr-2">已选择 <span
+                                id="stock-selected-count">0</span> 项</span>
+                        <button onclick="batchCopyStock()" class="shadcn-btn shadcn-btn-outline gap-2 text-xs h-8">
+                            <i class="fa-solid fa-copy"></i> 批量复制
+                        </button>
+                        <button onclick="batchDeleteStock()"
+                            class="shadcn-btn bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 gap-2 text-xs h-8">
+                            <i class="fa-solid fa-trash"></i> 批量删除
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-border">
+                                    <th class="py-2 px-2 w-10">
+                                        <input type="checkbox" id="stock-select-all" onchange="toggleStockSelectAll()"
+                                            class="rounded border-input h-4 w-4">
+                                    </th>
+                                    <th class="text-left py-2 px-2 text-muted-foreground font-medium">ID</th>
+                                    <th class="text-left py-2 px-2 text-muted-foreground font-medium">激活码</th>
+                                    <th class="text-left py-2 px-2 text-muted-foreground font-medium">状态</th>
+                                    <th class="text-left py-2 px-2 text-muted-foreground font-medium">关联订单</th>
+                                    <th class="text-left py-2 px-2 text-muted-foreground font-medium">创建时间</th>
+                                    <th class="text-right py-2 px-2 text-muted-foreground font-medium">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-body">
+                                <tr>
+                                    <td colspan="6" class="text-center py-8 text-muted-foreground">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="stock-pagination"
+                    class="p-4 border-t border-border flex items-center justify-end gap-2 hidden">
+                    <button onclick="changePage('stock', -1)" id="stock-prev"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">上一页</button>
+                    <span id="stock-page-info" class="text-xs text-muted-foreground font-mono">1/1</span>
+                    <button onclick="changePage('stock', 1)" id="stock-next"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">下一页</button>
+                </div>
+                <div id="stock-empty" class="hidden py-16 text-center text-muted-foreground">
+                    <p>暂无库存</p>
+                </div>
+            </div>
+
+            <!-- ORDERS MANAGEMENT -->
+            <div id="tab-content-orders" class="hidden">
+                <div class="p-4 border-b border-border flex items-center justify-between">
+                    <div class="flex items-center gap-3 text-sm">
+                        <span class="text-muted-foreground">待支付 <strong class="text-orange-600"
+                                id="order-stat-pending-count">0</strong> (¥<span
+                                id="order-stat-pending-amount">0</span>)</span>
+                        <span class="text-muted-foreground">已支付 <strong class="text-green-600"
+                                id="order-stat-success-count">0</strong> (¥<span
+                                id="order-stat-success-amount">0</span>)</span>
+                        <span class="text-muted-foreground">失败 <strong class="text-red-600"
+                                id="order-stat-fail-count">0</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label
+                            class="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                            <input type="checkbox" id="show-completed-orders" checked
+                                class="rounded border-input text-primary focus:ring-primary h-4 w-4"
+                                onchange="applyOrderFilter()">
+                            仅显示已完成
+                        </label>
+                        <input type="text" id="order-search-input" placeholder="搜索订单号"
+                            class="h-8 px-3 py-1 text-sm border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        <button onclick="searchOrders()" class="shadcn-btn shadcn-btn-primary text-xs h-8">
+                            <i class="fa-solid fa-search"></i>
+                        </button>
+                        <button onclick="loadOrders()"
+                            class="shadcn-btn bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs h-8">
+                            <i class="fa-solid fa-rotate"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-border">
+                                    <th class="text-left py-2 px-2 text-muted-foreground font-medium">订单号</th>
+                                    <th class="text-left py-2 px-2 text-muted-foreground font-medium">金额</th>
+                                    <th class="text-left py-2 px-2 text-muted-foreground font-medium">状态</th>
+                                    <th class="text-left py-2 px-2 text-muted-foreground font-medium">激活码</th>
+                                    <th class="text-left py-2 px-2 text-muted-foreground font-medium">创建时间</th>
+                                    <th class="text-left py-2 px-2 text-muted-foreground font-medium">支付时间</th>
+                                    <th class="text-center py-2 px-2 text-muted-foreground font-medium">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-body">
+                                <tr>
+                                    <td colspan="6" class="text-center py-8 text-muted-foreground">加载中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="orders-pagination"
+                    class="p-4 border-t border-border flex items-center justify-end gap-2 hidden">
+                    <button onclick="changePage('orders', -1)" id="orders-prev"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">上一页</button>
+                    <span id="orders-page-info" class="text-xs text-muted-foreground font-mono">1/1</span>
+                    <button onclick="changePage('orders', 1)" id="orders-next"
+                        class="shadcn-btn shadcn-btn-outline h-8 px-3 text-xs">下一页</button>
+                </div>
+                <div id="orders-empty" class="hidden py-16 text-center text-muted-foreground">
+                    <p>暂无订单</p>
+                </div>
+            </div>
+
+            <div id="tab-content-settings" class="hidden">
+                <div class="p-4 border-b border-border flex items-center justify-between">
+                    <h2 class="text-sm font-semibold">系统设置</h2>
+                    <button onclick="loadSettings()" id="refresh-settings-btn"
+                        class="shadcn-btn shadcn-btn-ghost w-8 h-8 p-0">
+                        <i id="refresh-settings-icon" class="fa-solid fa-rotate text-xs"></i>
+                    </button>
+                </div>
+                <div class="p-4 space-y-6">
+                    <div class="flex items-center justify-between border border-border rounded-lg p-4">
+                        <div>
+                            <div class="text-sm font-medium">限时免费邀请模式</div>
+                            <div class="text-xs text-muted-foreground">开启后前端首页将显示限免入口及横幅</div>
+                        </div>
+                        <div class="flex flex-col items-end gap-2">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="setting-free-invite-enabled" class="sr-only peer">
+                                <div
+                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-blue-600">
+                                </div>
+                                <div
+                                    class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-5">
+                                </div>
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] text-muted-foreground">结束时间:</span>
+                                <input type="datetime-local" id="setting-free-invite-end-time"
+                                    class="text-[10px] border border-input rounded px-1 py-0.5 focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between border border-border rounded-lg p-4">
+                        <div>
+                            <div class="text-sm font-medium">自动换号</div>
+                            <div class="text-xs text-muted-foreground">关闭后将停止自动切换母号</div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="setting-auto-switch" class="sr-only peer">
+                            <div
+                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-green-600">
+                            </div>
+                            <div
+                                class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition peer-checked:translate-x-5">
+                            </div>
+                        </label>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">后台密码</label>
+                            <input type="password" id="setting-admin-password" class="shadcn-input" placeholder="留空不修改">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">群链接/群号</label>
+                            <input type="text" id="setting-group-url" class="shadcn-input">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">客服链接/客服号</label>
+                            <input type="text" id="setting-customer-service-url" class="shadcn-input">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">易支付商户ID</label>
+                            <input type="text" id="setting-epay-merchant-id" class="shadcn-input">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">易支付API密钥</label>
+                            <input type="password" id="setting-epay-api-key" class="shadcn-input" placeholder="留空不修改">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">易支付回调地址</label>
+                            <input type="text" id="setting-epay-notify-url" class="shadcn-input">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">易支付返回地址</label>
+                            <input type="text" id="setting-epay-return-url" class="shadcn-input">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">易支付网关地址</label>
+                            <input type="text" id="setting-epay-gateway-url" class="shadcn-input">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">商品价格 (Team)</label>
+                            <input type="number" step="0.01" id="setting-epay-product-price" class="shadcn-input">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">支付手续费率</label>
+                            <input type="number" step="0.01" id="setting-payment-fee-rate" class="shadcn-input">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">订单超时(秒)</label>
+                            <input type="number" id="setting-order-timeout" class="shadcn-input">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium">订单清理间隔(秒)</label>
+                            <input type="number" id="setting-order-cleanup-interval" class="shadcn-input">
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button onclick="saveSettings()" class="shadcn-btn shadcn-btn-primary">保存设置</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-content-logs" class="hidden">
+                <div class="p-4 border-b border-border flex items-center justify-between bg-muted/20">
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-sm font-semibold flex items-center gap-2">
+                            <i class="fa-solid fa-terminal text-xs"></i> 实时日志
+                        </h2>
+                        <span
+                            class="text-[10px] bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded border border-zinc-200">仅显示最新2500行</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <label
+                            class="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground">
+                            <input type="checkbox" id="log-auto-refresh"
+                                class="rounded border-input text-primary focus:ring-primary h-3.5 w-3.5" checked>
+                            自动刷新 (10s)
+                        </label>
+                        <button onclick="loadLogs()" id="refresh-logs-btn"
+                            class="shadcn-btn shadcn-btn-ghost w-8 h-8 p-0">
+                            <i id="refresh-logs-icon" class="fa-solid fa-rotate text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-0 bg-zinc-950 overflow-hidden relative group">
+                    <div id="logs-container"
+                        class="h-[600px] overflow-y-auto p-4 font-mono text-[11px] leading-relaxed text-zinc-300 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+                        <div class="flex items-center justify-center h-full text-zinc-600">
+                            <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> 加载中...
+                        </div>
+                    </div>
+                    <button onclick="scrollToBottom()"
+                        class="absolute bottom-4 right-6 bg-zinc-800/80 hover:bg-white hover:text-black text-white px-3 py-1.5 rounded-md text-[10px] transition-all opacity-0 group-hover:opacity-100 shadow-xl border border-zinc-700/50 backdrop-blur-sm">
+                        <i class="fa-solid fa-arrow-down mr-1"></i> 回到最下
+                    </button>
+                </div>
+                <div
+                    class="p-3 border-t border-border bg-muted/10 flex items-center justify-between text-[10px] text-muted-foreground">
+                    <div id="log-status">就绪</div>
+                    <div id="log-info">总行数: -</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Generate Modal -->
+    <div id="generate-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="shadcn-card bg-white w-full max-w-sm p-6 shadow-lg animate-fade-in">
+            <h3 class="text-lg font-semibold mb-4">生成激活码</h3>
+
+            <div class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-sm font-medium">数量</label>
+                    <input type="number" id="generate-count" value="1" min="1" max="100" class="shadcn-input">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-sm font-medium">备注 (可选)</label>
+                    <input type="text" id="generate-note" class="shadcn-input" placeholder="例如: 内部测试用">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="hideGenerateModal()" class="shadcn-btn shadcn-btn-ghost">取消</button>
+                <button onclick="generateCodes()" id="generate-submit-btn"
+                    class="shadcn-btn shadcn-btn-primary">确认生成</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Add Modal -->
+    <div id="stock-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold mb-4">批量添加库存激活码</h3>
+                <form id="stock-add-form" onsubmit="submitAddStock(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">激活码列表</label>
+                        <textarea id="stock-codes-input" name="codes" rows="10"
+                            placeholder="每行一个激活码，或用逗号、空格分隔&#10;例如:&#10;CODE1&#10;CODE2&#10;CODE3"
+                            class="w-full px-3 py-2 border border-input rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary"
+                            required></textarea>
+                        <p class="text-xs text-muted-foreground mt-1">支持换行、逗号、空格分隔</p>
+                    </div>
+                    <div class="flex gap-2 justify-end">
+                        <button type="button" onclick="hideStockModal()"
+                            class="shadcn-btn bg-secondary text-secondary-foreground hover:bg-secondary/80">
+                            取消
+                        </button>
+                        <button type="submit" class="shadcn-btn shadcn-btn-primary">
+                            添加
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Config Modal (母号配置弹窗) -->
+    <div id="teamconfig-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="shadcn-card bg-white w-full max-w-lg p-6 shadow-lg animate-fade-in max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold" id="teamconfig-modal-title">添加母号配置</h3>
+                <button type="button" onclick="fillTeamConfigFromClipboard()"
+                    class="shadcn-btn shadcn-btn-outline text-xs gap-2" title="格式: 名称:邮箱:AccountID:Token">
+                    <i class="fa-regular fa-clipboard"></i> 剪切板填充
+                </button>
+            </div>
+            <input type="hidden" id="teamconfig-edit-id" value="">
+
+            <div class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-sm font-medium">名称 <span class="text-red-500">*</span></label>
+                    <input type="text" id="teamconfig-name" class="shadcn-input" placeholder="例如: 主号、备用号">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-sm font-medium">Authorization Token <span class="text-red-500">*</span></label>
+                    <textarea id="teamconfig-token" class="shadcn-input h-24 resize-none font-mono text-xs"
+                        placeholder="Bearer eyJhbGc...（完整的 JWT Token）"></textarea>
+                    <p class="text-xs text-muted-foreground">从浏览器开发者工具中获取，以 "Bearer " 开头</p>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-sm font-medium">Account ID <span class="text-red-500">*</span></label>
+                    <input type="text" id="teamconfig-account-id" class="shadcn-input font-mono"
+                        placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+                    <p class="text-xs text-muted-foreground">Team 账户的唯一标识 (UUID格式)</p>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-sm font-medium">母号邮箱</label>
+                    <input type="email" id="teamconfig-owner-email" class="shadcn-input"
+                        placeholder="owner@example.com">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-sm font-medium">备注</label>
+                    <input type="text" id="teamconfig-note" class="shadcn-input" placeholder="可选备注信息">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded border border-gray-100">
+                    <div class="space-y-1">
+                        <label class="text-sm font-medium">最大可超人数</label>
+                        <input type="number" id="teamconfig-max-overload" class="shadcn-input" value="0" min="0"
+                            placeholder="0">
+                    </div>
+                    <div class="flex items-end pb-2">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="teamconfig-allow-overload"
+                                class="rounded border-input h-4 w-4 text-primary focus:ring-primary">
+                            <label for="teamconfig-allow-overload"
+                                class="text-sm font-medium cursor-pointer">允许超载</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="teamconfig-is-active" class="rounded border-input h-4 w-4">
+                    <label for="teamconfig-is-active" class="text-sm">设为当前激活配置</label>
+                </div>
+            </div>
+
+            <div id="teamconfig-error" class="hidden mt-4 p-3 rounded-md bg-red-50 text-red-600 text-sm"></div>
+
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="hideTeamConfigModal()" class="shadcn-btn shadcn-btn-ghost">取消</button>
+                <button onclick="saveTeamConfig()" id="teamconfig-submit-btn"
+                    class="shadcn-btn shadcn-btn-primary">保存配置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Config Bulk Import Modal -->
+    <div id="teamconfig-bulk-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="shadcn-card bg-white w-full max-w-2xl p-6 shadow-lg animate-fade-in max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-semibold mb-4">批量导入母号</h3>
+
+            <div class="space-y-4">
+                <div class="p-4 bg-blue-50 text-blue-700 rounded-md text-sm">
+                    <p class="font-medium mb-1">格式说明 (JSON Array)</p>
+                    <pre class="text-xs bg-white/50 p-2 rounded border border-blue-100 mt-1 whitespace-pre-wrap">
+[
+  {
+    "name": "母号1",
+    "authorization_token": "Bearer ...",
+    "account_id": "...",
+    "owner_email": "...",
+    "note": "...",
+    "allow_overload": 1,
+    "max_overload": 2
+  },
+  ...
+]
+                    </pre>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">选择JSON文件</label>
+                    <input type="file" id="bulk-file-input" accept=".json" class="block w-full text-sm text-slate-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-violet-50 file:text-violet-700
+                        hover:file:bg-violet-100
+                    " />
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">或直接粘贴 JSON 内容</label>
+                    <textarea id="bulk-json-input" class="shadcn-input h-32 font-mono text-xs"
+                        placeholder="在此粘贴 JSON 内容..."></textarea>
+                </div>
+
+                <!-- Progress Section -->
+                <div id="bulk-progress-section" class="hidden space-y-2 pt-4 border-t border-border">
+                    <div class="flex justify-between text-sm">
+                        <span id="bulk-status-text">正在导入...</span>
+                        <span id="bulk-progress-text">0/0</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="bulk-progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                            style="width: 0%"></div>
+                    </div>
+                    <div id="bulk-result-summary"
+                        class="text-xs text-muted-foreground mt-2 hidden max-h-32 overflow-y-auto whitespace-pre-wrap">
+                    </div>
+                </div>
+
+                <div id="bulk-error" class="hidden p-3 rounded-md bg-red-50 text-red-600 text-sm"></div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-6">
+                <button onclick="hideTeamConfigBulkModal()" id="bulk-cancel-btn"
+                    class="shadcn-btn shadcn-btn-ghost">关闭</button>
+                <button onclick="checkBulkFormat()" id="bulk-check-btn"
+                    class="shadcn-btn shadcn-btn-outline">检查格式</button>
+                <button onclick="startBulkImport()" id="bulk-import-btn" class="shadcn-btn shadcn-btn-primary"
+                    disabled>开始导入</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Store
+        const appStore = {
+            activation: { items: [], page: 1, pageSize: 25, total: 0, serverSide: true },
+            pending: { items: [], page: 1, pageSize: 12 },
+            members: { items: [], page: 1, pageSize: 12 },
+            records: { items: [], page: 1, pageSize: 15 },
+            teamconfig: { items: [], page: 1, pageSize: 25, total: 0, serverSide: true },
+            stock: { items: [], page: 1, pageSize: 25, total: 0, serverSide: true, selectedIds: [], lastSelectedIndex: -1 },
+            orders: { items: [], page: 1, pageSize: 25, total: 0, serverSide: true, search: '' },
+            logs: { lastFetched: 0, intervalId: null }
+        };
+
+        // ============ Stock Management ============
+        function showAddStockModal() {
+            document.getElementById('stock-modal').classList.remove('hidden');
+            document.getElementById('stock-codes-input').value = '';
+        }
+
+        function hideStockModal() {
+            document.getElementById('stock-modal').classList.add('hidden');
+        }
+
+
+
+        async function submitAddStock(event) {
+            event.preventDefault();
+            const text = document.getElementById('stock-codes-input').value.trim();
+            if (!text) return;
+            const formData = new FormData();
+            formData.append('codes', text);
+
+            try {
+                const resp = await fetch('/admin/api/stock/add', { method: 'POST', body: formData });
+                const result = await resp.json();
+
+                if (result.success) {
+                    await Modal.success(result.message || '添加成功');
+                    hideStockModal();
+                    loadStockCodes();
+                } else {
+                    await Modal.error(result.message || '添加失败');
+                }
+            } catch (err) {
+                await Modal.error('网络错误: ' + err.message);
+            }
+        }
+
+        async function loadStockCodes() {
+            try {
+                const includeSold = document.getElementById('show-sold-stock').checked;
+                const page = appStore.stock.page || 1;
+                const resp = await fetch(`/admin/api/stock/codes?include_sold=${includeSold}&page=${page}`);
+                const data = await resp.json();
+                if (data.success) {
+                    const codes = data.codes || [];
+                    const stats = data.stats || {};
+                    document.getElementById('stock-stat-total').textContent = stats.total || 0;
+                    document.getElementById('stock-stat-unsold').textContent = stats.unsold || 0;
+                    document.getElementById('stock-stat-sold').textContent = stats.sold || 0;
+                    document.getElementById('stock-stat-redis').textContent = stats.redis_count || 0;
+                    appStore.stock.items = codes;
+                    appStore.stock.total = data.total || (stats.total ?? 0) || 0;
+                }
+                renderTable('stock', renderStockRow);
+                updateStockSelectionUI();
+            } catch (err) {
+                console.error('加载库存失败:', err);
+            }
+        }
+
+        function applyStockFilter(resetPage = true) {
+            if (resetPage) appStore.stock.page = 1;
+            loadStockCodes();
+        }
+
+        function renderStockRow(item, index) {
+            const isSelected = appStore.stock.selectedIds.includes(item.id);
+            const statusBadge = item.status === 0
+                ? '<span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">未售</span>'
+                : '<span class="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded">已售</span>';
+
+            const deleteBtn = `<button onclick="deleteStockCode('${item.code}')" class="text-red-600 hover:text-red-800 text-xs" title="${item.status === 1 ? '删除已售激活码及关联订单' : '删除激活码'}"><i class="fa-solid fa-trash"></i></button>`;
+
+            return `
+                <tr class="border-b border-border hover:bg-muted/5 cursor-pointer ${isSelected ? 'bg-blue-50/50' : ''}" onclick="handleStockRowClick(event, ${index}, ${item.id})">
+                    <td class="py-2 px-2" onclick="event.stopPropagation()">
+                        <input type="checkbox" class="stock-item-checkbox rounded border-input h-4 w-4" 
+                            data-id="${item.id}" ${isSelected ? 'checked' : ''} 
+                            onchange="toggleStockSelectItem(event, ${index}, ${item.id})">
+                    </td>
+                    <td class="py-2 px-2 text-xs">${item.id}</td>
+                    <td class="py-2 px-2 font-mono text-xs">${item.code}</td>
+                    <td class="py-2 px-2">${statusBadge}</td>
+                    <td class="py-2 px-2 font-mono text-xs">${item.sold_order_id || '-'}</td>
+                    <td class="py-2 px-2 text-xs text-muted-foreground">${item.created_at}</td>
+                    <td class="py-2 px-2 text-right" onclick="event.stopPropagation()">${deleteBtn}</td>
+                </tr>
+            `;
+        }
+
+        async function deleteStockCode(code, force = false) {
+            // 第一次确认
+            if (!force && !await Modal.confirm('确定要删除该库存激活码吗？', '删除激活码')) return;
+
+            const formData = new FormData();
+            formData.append('code', code);
+            if (force) {
+                formData.append('force', 'true');
+            }
+
+            try {
+                const endpoint = '/admin/api/stock/delete';
+                const resp = await fetch(endpoint, { method: 'POST', body: formData });
+                const result = await resp.json();
+
+                if (result.success) {
+                    await Modal.success(result.message || '删除成功');
+                    loadStockCodes();
+                } else if (result.need_confirm) {
+                    // 需要二次确认（已售激活码）
+                    if (await Modal.warning(`${result.message}\n\n点击确定继续删除`, '⚠️ 警告')) {
+                        // 强制删除
+                        deleteStockCode(code, true);
+                    }
+                } else {
+                    await Modal.error(result.message || '删除失败');
+                }
+            } catch (err) {
+                await Modal.error('网络错误: ' + err.message);
+            }
+        }
+
+        async function syncStockCount() {
+            if (!await Modal.confirm('确定要同步库存计数吗？\n\n这将从数据库重新计算库存并更新到Redis。')) return;
+
+            try {
+                const resp = await fetch('/admin/api/stock/sync', { method: 'POST' });
+                const result = await resp.json();
+
+                if (result.success) {
+                    await Modal.success(result.message || '同步成功');
+                    loadStockCodes();
+                } else {
+                    await Modal.error(result.message || '同步失败');
+                }
+            } catch (err) {
+                await Modal.error('网络错误: ' + err.message);
+            }
+        }
+
+        // Batch Selection Logic
+        function updateStockSelectionUI() {
+            const count = appStore.stock.selectedIds.length;
+            const batchBar = document.getElementById('stock-batch-actions');
+            const countEl = document.getElementById('stock-selected-count');
+            const selectAllCheckbox = document.getElementById('stock-select-all');
+
+            if (count > 0) {
+                batchBar.classList.remove('hidden');
+                countEl.textContent = count;
+            } else {
+                batchBar.classList.add('hidden');
+            }
+
+            // Update select all checkbox state
+            if (appStore.stock.items.length > 0) {
+                const allSelected = appStore.stock.items.every(item => appStore.stock.selectedIds.includes(item.id));
+                selectAllCheckbox.checked = allSelected;
+                selectAllCheckbox.indeterminate = count > 0 && !allSelected;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+        }
+
+        function toggleStockSelectItem(event, index, id) {
+            const checked = event.target.checked;
+            if (checked) {
+                if (!appStore.stock.selectedIds.includes(id)) {
+                    appStore.stock.selectedIds.push(id);
+                }
+            } else {
+                appStore.stock.selectedIds = appStore.stock.selectedIds.filter(sid => sid !== id);
+            }
+            appStore.stock.lastSelectedIndex = index;
+            updateStockSelectionUI();
+            renderTable('stock', renderStockRow);
+        }
+
+        function handleStockRowClick(event, index, id) {
+            // If clicking on a button or checkbox, don't trigger row click
+            if (event.target.tagName === 'BUTTON' || event.target.tagName === 'I' || event.target.type === 'checkbox') return;
+
+            const isShift = event.shiftKey;
+            const lastIdx = appStore.stock.lastSelectedIndex;
+
+            if (isShift && lastIdx !== -1) {
+                const start = Math.min(lastIdx, index);
+                const end = Math.max(lastIdx, index);
+                const itemsToSelect = appStore.stock.items.slice(start, end + 1);
+
+                // If the last clicked item was selected, we select the range. Otherwise we deselect.
+                const wasSelected = appStore.stock.selectedIds.includes(appStore.stock.items[lastIdx].id);
+
+                itemsToSelect.forEach(item => {
+                    if (wasSelected) {
+                        if (!appStore.stock.selectedIds.includes(item.id)) appStore.stock.selectedIds.push(item.id);
+                    } else {
+                        appStore.stock.selectedIds = appStore.stock.selectedIds.filter(sid => sid !== item.id);
+                    }
+                });
+            } else {
+                if (appStore.stock.selectedIds.includes(id)) {
+                    appStore.stock.selectedIds = appStore.stock.selectedIds.filter(sid => sid !== id);
+                } else {
+                    appStore.stock.selectedIds.push(id);
+                }
+            }
+
+            appStore.stock.lastSelectedIndex = index;
+            updateStockSelectionUI();
+            renderTable('stock', renderStockRow);
+        }
+
+        function toggleStockSelectAll() {
+            const checked = document.getElementById('stock-select-all').checked;
+            if (checked) {
+                appStore.stock.items.forEach(item => {
+                    if (!appStore.stock.selectedIds.includes(item.id)) {
+                        appStore.stock.selectedIds.push(item.id);
+                    }
+                });
+            } else {
+                const pageIds = appStore.stock.items.map(item => item.id);
+                appStore.stock.selectedIds = appStore.stock.selectedIds.filter(id => !pageIds.includes(id));
+            }
+            updateStockSelectionUI();
+            renderTable('stock', renderStockRow);
+        }
+
+        async function batchCopyStock() {
+            const selectedItems = appStore.stock.items.filter(item => appStore.stock.selectedIds.includes(item.id));
+            if (selectedItems.length === 0) return;
+
+            if (!await Modal.confirm(`确定要复制选中的 ${selectedItems.length} 件商品吗？`, '批量复制')) return;
+
+            const codes = selectedItems.map(item => item.code).join('\n');
+            try {
+                await navigator.clipboard.writeText(codes);
+                await Modal.success('已复制到剪贴板');
+            } catch (err) {
+                await Modal.error('复制失败: ' + err.message);
+            }
+        }
+
+        async function batchDeleteStock() {
+            const selectedIds = appStore.stock.selectedIds;
+            if (selectedIds.length === 0) return;
+
+            const confirmText = await Modal.prompt(
+                `此操作将永久删除 ${selectedIds.length} 件商品，是否继续？\n\n请输入 "DELETE" 进行二次确认:`,
+                '⚠️ 危险操作'
+            );
+
+            if (confirmText !== 'DELETE') {
+                if (confirmText !== null) await Modal.error('确认失败，操作已取消');
+                return;
+            }
+
+            // Show loading
+            const deleteBtn = document.querySelector('#stock-batch-actions button.bg-red-50');
+            const originalText = deleteBtn.innerHTML;
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 正在删除...';
+
+            try {
+                const endpoint = '/admin/api/stock/batch-delete';
+                const resp = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: selectedIds })
+                });
+                const result = await resp.json();
+
+                if (result.success) {
+                    await Modal.success(result.message || '批量删除成功');
+                    appStore.stock.selectedIds = [];
+                    updateStockSelectionUI();
+                    loadStockCodes();
+                } else {
+                    await Modal.error(result.message || '删除失败');
+                }
+            } catch (err) {
+                await Modal.error('网络错误: ' + err.message);
+            } finally {
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = originalText;
+            }
+        }
+
+        // ============ Orders Management ============
+
+
+        async function loadOrders() {
+            try {
+                const page = appStore.orders.page || 1;
+                const onlyCompleted = document.getElementById('show-completed-orders').checked;
+                const search = appStore.orders.search || '';
+                const params = new URLSearchParams();
+                params.set('page', page);
+                if (onlyCompleted) params.set('only_completed', 'true');
+                if (search) params.set('search', search);
+                const resp = await fetch(`/admin/api/orders?${params.toString()}`);
+                const data = await resp.json();
+                if (data.success) {
+                    const orders = data.orders || [];
+                    const stats = data.stats || {};
+                    document.getElementById('order-stat-pending-count').textContent = stats.pending?.count || 0;
+                    document.getElementById('order-stat-pending-amount').textContent = (stats.pending?.amount || 0).toFixed(2);
+                    document.getElementById('order-stat-success-count').textContent = stats.success?.count || 0;
+                    document.getElementById('order-stat-success-amount').textContent = (stats.success?.amount || 0).toFixed(2);
+                    document.getElementById('order-stat-fail-count').textContent = stats.fail?.count || 0;
+                    setOrdersEmptyMessage(search ? '未找到匹配的订单' : '暂无订单');
+                    appStore.orders.items = orders;
+                    appStore.orders.total = data.total || 0;
+                }
+                renderTable('orders', renderOrderRow);
+            } catch (err) {
+                console.error('加载订单失败:', err);
+            }
+        }
+
+        async function searchOrders() {
+            const searchValue = document.getElementById('order-search-input').value.trim();
+            appStore.orders.search = searchValue;
+            appStore.orders.page = 1;
+
+            try {
+                await loadOrders();
+            } catch (err) {
+                console.error('搜索订单失败:', err);
+            }
+        }
+
+        function setOrdersEmptyMessage(message) {
+            const emptyEl = document.getElementById('orders-empty');
+            if (emptyEl) {
+                emptyEl.innerHTML = `<p>${message}</p>`;
+            }
+        }
+
+        function applyOrderFilter(resetPage = true) {
+            if (resetPage) appStore.orders.page = 1;
+            loadOrders();
+        }
+
+        function renderOrderRow(item) {
+            let statusBadge = '';
+            let actionBtns = '';
+
+            if (item.status === 'success') {
+                statusBadge = '<span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">已支付</span>';
+                actionBtns = `<button onclick="adminDeleteOrder('${item.order_id}')" class="text-red-600 hover:text-red-800 text-xs ml-2" title="删除订单并解绑激活码"><i class="fa-solid fa-trash"></i></button>`;
+            } else if (item.status === 'pending') {
+                statusBadge = '<span class="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded">待支付</span>';
+                actionBtns = `
+                    <button onclick="adminCompleteOrder('${item.order_id}')" class="text-green-600 hover:text-green-800 text-xs" title="补单（标记为已支付）"><i class="fa-solid fa-check"></i></button>
+                    <button onclick="adminCancelOrder('${item.order_id}')" class="text-orange-600 hover:text-orange-800 text-xs ml-2" title="取消订单"><i class="fa-solid fa-xmark"></i></button>
+                    <button onclick="adminDeleteOrder('${item.order_id}')" class="text-red-600 hover:text-red-800 text-xs ml-2" title="删除订单"><i class="fa-solid fa-trash"></i></button>
+                `;
+            } else {
+                statusBadge = '<span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded">已取消</span>';
+                actionBtns = `<button onclick="adminDeleteOrder('${item.order_id}')" class="text-red-600 hover:text-red-800 text-xs" title="删除订单"><i class="fa-solid fa-trash"></i></button>`;
+            }
+
+            const amountValue = typeof item.amount === 'number' ? item.amount : parseFloat(item.amount || 0);
+
+            return `
+                <tr class="border-b border-border hover:bg-muted/5">
+                    <td class="py-2 px-2 font-mono text-xs">${item.order_id}</td>
+                    <td class="py-2 px-2 text-xs">¥${(amountValue || 0).toFixed(2)}</td>
+                    <td class="py-2 px-2">${statusBadge}</td>
+                    <td class="py-2 px-2 font-mono text-xs">${item.code || '-'}</td>
+                    <td class="py-2 px-2 text-xs text-muted-foreground">${item.created_at}</td>
+                    <td class="py-2 px-2 text-xs text-muted-foreground">${item.pay_time || '-'}</td>
+                    <td class="py-2 px-2 text-center">${actionBtns}</td>
+                </tr>
+            `;
+        }
+
+        async function adminCancelOrder(orderId) {
+            if (!await Modal.confirm(`确定要取消订单 ${orderId} 吗？
+激活码将立即释放回库存。`, '取消订单')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('order_id', orderId);
+
+            try {
+                const resp = await fetch('/admin/api/order/cancel', { method: 'POST', body: formData });
+                const result = await resp.json();
+
+                if (result.success) {
+                    await Modal.success(result.message || '取消成功');
+                    loadOrders();  // 刷新列表
+                } else {
+                    await Modal.error(result.message || '取消失败');
+                }
+            } catch (err) {
+                await Modal.error('网络错误: ' + err.message);
+            }
+        }
+
+        async function adminCompleteOrder(orderId) {
+            if (!await Modal.warning(`确定要手动补单吗？
+
+订单号: ${orderId}
+
+操作说明：
+• 订单将被标记为已支付
+• 支付流水号标记为 MANUAL
+• 激活码归该订单所有
+• 此操作用于线下支付或补单场景`, '⚠️ 手动补单')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('order_id', orderId);
+
+            try {
+                const resp = await fetch('/admin/api/order/complete', { method: 'POST', body: formData });
+                const result = await resp.json();
+
+                if (result.success) {
+                    await Modal.success(result.message || '补单成功');
+                    loadOrders();  // 刷新列表
+                } else {
+                    await Modal.error(result.message || '补单失败');
+                }
+            } catch (err) {
+                await Modal.error('网络错误: ' + err.message);
+            }
+        }
+
+        async function adminDeleteOrder(orderId) {
+            if (!await Modal.warning(`确定要删除订单 ${orderId} 吗？
+
+注意：
+• 订单将被永久删除
+• 关联的激活码将解绑并重新可用
+• 激活码不会被删除`, '⚠️ 删除订单')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('order_id', orderId);
+
+            try {
+                const resp = await fetch('/admin/api/order/delete', { method: 'POST', body: formData });
+                const result = await resp.json();
+
+                if (result.success) {
+                    await Modal.success(result.message || '删除成功');
+                    loadOrders();  // 刷新列表
+                } else {
+                    await Modal.error(result.message || '删除失败');
+                }
+            } catch (err) {
+                await Modal.error('网络错误: ' + err.message);
+            }
+        }
+
+        async function loadSettings() {
+            startRefreshAnimation('refresh-settings-icon');
+            try {
+                const resp = await fetch('/admin/api/settings');
+                const data = await resp.json();
+                if (data.success && data.settings) {
+                    const s = data.settings;
+                    document.getElementById('setting-admin-password').value = '';
+                    document.getElementById('setting-group-url').value = s.GROUP_URL || '';
+                    document.getElementById('setting-customer-service-url').value = s.CUSTOMER_SERVICE_URL || '';
+                    document.getElementById('setting-epay-merchant-id').value = s.EPAY_MERCHANT_ID || '';
+                    document.getElementById('setting-epay-notify-url').value = s.EPAY_NOTIFY_URL || '';
+                    document.getElementById('setting-epay-return-url').value = s.EPAY_RETURN_URL || '';
+                    document.getElementById('setting-epay-gateway-url').value = s.EPAY_GATEWAY_URL || '';
+                    document.getElementById('setting-epay-product-price').value = s.EPAY_PRODUCT_PRICE ?? '';
+
+                    document.getElementById('setting-payment-fee-rate').value = s.PAYMENT_FEE_RATE ?? '';
+                    document.getElementById('setting-order-timeout').value = s.ORDER_TIMEOUT ?? '';
+                    document.getElementById('setting-order-cleanup-interval').value = s.ORDER_CLEANUP_INTERVAL ?? '';
+                    document.getElementById('setting-auto-switch').checked = !!s.AUTO_SWITCH_ENABLED;
+                    document.getElementById('setting-free-invite-enabled').checked = !!s.FREE_INVITE_ENABLED;
+
+                    if (s.FREE_INVITE_END_TIME > 0) {
+                        const date = new Date(s.FREE_INVITE_END_TIME * 1000);
+                        const localISOTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+                        document.getElementById('setting-free-invite-end-time').value = localISOTime;
+                    } else {
+                        document.getElementById('setting-free-invite-end-time').value = '';
+                    }
+                }
+            } catch (err) {
+                console.error('加载设置失败:', err);
+            } finally {
+                stopRefreshAnimation('refresh-settings-icon');
+            }
+        }
+
+        async function saveSettings() {
+            const payload = {
+                GROUP_URL: document.getElementById('setting-group-url').value.trim(),
+                CUSTOMER_SERVICE_URL: document.getElementById('setting-customer-service-url').value.trim(),
+                EPAY_MERCHANT_ID: document.getElementById('setting-epay-merchant-id').value.trim(),
+                EPAY_NOTIFY_URL: document.getElementById('setting-epay-notify-url').value.trim(),
+                EPAY_RETURN_URL: document.getElementById('setting-epay-return-url').value.trim(),
+                EPAY_GATEWAY_URL: document.getElementById('setting-epay-gateway-url').value.trim(),
+                EPAY_PRODUCT_PRICE: document.getElementById('setting-epay-product-price').value,
+
+                PAYMENT_FEE_RATE: document.getElementById('setting-payment-fee-rate').value,
+                ORDER_TIMEOUT: document.getElementById('setting-order-timeout').value,
+                ORDER_CLEANUP_INTERVAL: document.getElementById('setting-order-cleanup-interval').value,
+                AUTO_SWITCH_ENABLED: document.getElementById('setting-auto-switch').checked ? 1 : 0,
+                FREE_INVITE_ENABLED: document.getElementById('setting-free-invite-enabled').checked ? 1 : 0,
+                FREE_INVITE_END_TIME: document.getElementById('setting-free-invite-end-time').value ? Math.floor(new Date(document.getElementById('setting-free-invite-end-time').value).getTime() / 1000) : 0
+            };
+            const adminPassword = document.getElementById('setting-admin-password').value.trim();
+            if (adminPassword) payload.ADMIN_PASSWORD = adminPassword;
+            const apiKey = document.getElementById('setting-epay-api-key').value.trim();
+            if (apiKey) payload.EPAY_API_KEY = apiKey;
+            try {
+                const resp = await fetch('/admin/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await resp.json();
+                if (result.success) {
+                    await Modal.success(result.message || '设置已保存');
+                    if (adminPassword) {
+                        document.getElementById('setting-admin-password').value = '';
+                        window.location.href = '/admin/logout';
+                        return;
+                    }
+                    if (apiKey) document.getElementById('setting-epay-api-key').value = '';
+                    loadSettings();
+                } else {
+                    await Modal.error(result.message || '保存失败');
+                }
+            } catch (err) {
+                await Modal.error('网络错误: ' + err.message);
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-btn-${tabName}`).classList.add('active');
+
+            ['activation', 'pending', 'members', 'records', 'teamconfig', 'stock', 'orders', 'settings', 'logs'].forEach(name => {
+                const el = document.getElementById(`tab-content-${name}`);
+                if (name === tabName) {
+                    el.classList.remove('hidden');
+                    el.classList.add('block');
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('block');
+                }
+            });
+
+            // 停止之前的日志刷新（如果有）
+            if (appStore.logs.intervalId) {
+                clearInterval(appStore.logs.intervalId);
+                appStore.logs.intervalId = null;
+            }
+
+            // 切换逻辑
+            if (tabName === 'stock') {
+                loadStockCodes();
+            } else if (tabName === 'orders') {
+                loadOrders();
+            } else if (tabName === 'teamconfig') {
+                loadTeamConfigs();
+            } else if (tabName === 'settings') {
+                loadSettings();
+            } else if (tabName === 'logs') {
+                loadLogs();
+                // 开启定时刷新
+                appStore.logs.intervalId = setInterval(() => {
+                    const autoRefresh = document.getElementById('log-auto-refresh').checked;
+                    if (autoRefresh && isPageActive()) {
+                        loadLogs();
+                    }
+                }, 10000);
+            }
+        }
+
+        function formatDateTime(isoString) {
+            if (!isoString) return '-';
+            const date = new Date(isoString);
+            return date.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+
+        // --- Render Helpers ---
+
+        function renderTable(type, renderRowCallback) {
+            const store = appStore[type];
+            const tbody = document.getElementById(`${type}-body`);
+            const emptyState = document.getElementById(`${type}-empty`);
+            const pagination = document.getElementById(`${type}-pagination`);
+
+            const total = typeof store.total === 'number' ? store.total : (store.items ? store.items.length : 0);
+
+            if (total === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                pagination.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            pagination.classList.remove('hidden');
+
+            const totalPages = Math.ceil(total / store.pageSize);
+            if (store.page > totalPages) store.page = totalPages;
+            if (store.page < 1) store.page = 1;
+
+            const startIdx = (store.page - 1) * store.pageSize;
+            const endIdx = Math.min(startIdx + store.pageSize, total);
+            const pageItems = store.serverSide ? store.items : store.items.slice(startIdx, endIdx);
+
+            tbody.innerHTML = pageItems.map((item, idx) => renderRowCallback(item, idx)).join('');
+
+            document.getElementById(`${type}-prev`).disabled = store.page <= 1;
+            document.getElementById(`${type}-next`).disabled = store.page >= totalPages;
+            document.getElementById(`${type}-page-info`).textContent = `${store.page} / ${totalPages}`;
+        }
+
+        function changePage(type, delta) {
+            const store = appStore[type];
+            store.page += delta;
+            if (type === 'activation') loadActivationCodes();
+            else if (type === 'teamconfig') loadTeamConfigs();
+            else if (type === 'stock') loadStockCodes();
+            else if (type === 'orders') loadOrders();
+            else if (type === 'pending') renderTable('pending', renderPendingRow);
+            else if (type === 'members') renderTable('members', renderMembersRow);
+            else if (type === 'records') renderTable('records', renderRecordsRow);
+        }
+
+        function startRefreshAnimation(iconId) {
+            const icon = document.getElementById(iconId);
+            if (icon) icon.classList.add('fa-spin');
+        }
+        function stopRefreshAnimation(iconId) {
+            const icon = document.getElementById(iconId);
+            if (icon) icon.classList.remove('fa-spin');
+        }
+
+        // --- Activation Codes ---
+
+        function applyActivationFilter(resetPage = true) {
+            if (resetPage) appStore.activation.page = 1;
+            loadActivationCodes();
+        }
+
+        function loadActivationCodes() {
+            startRefreshAnimation('refresh-activation-icon');
+            const includeUsed = document.getElementById('show-used-codes').checked;
+            const page = appStore.activation.page || 1;
+            fetch(`/admin/api/activation-codes?include_used=${includeUsed}&page=${page}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        appStore.activation.items = data.codes || [];
+                        appStore.activation.total = data.total || (data.stats?.total ?? 0) || 0;
+                        renderTable('activation', renderActivationRow);
+
+                        if (data.stats) {
+                            document.getElementById('activation-stat-total').textContent = data.stats.total || 0;
+                            document.getElementById('activation-stat-unused').textContent = data.stats.unused || 0;
+
+                            const badge = document.getElementById('tab-count-activation');
+                            badge.textContent = data.stats.unused || 0;
+                            if (data.stats.unused > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+                        }
+                    }
+                })
+                .finally(() => stopRefreshAnimation('refresh-activation-icon'));
+        }
+
+        function renderActivationRow(item) {
+            let statusBadge = '<span class="badge badge-green">未使用</span>';
+            let actionBtns = '';
+
+            // 状态逻辑細化
+            if (item.status === 2) {
+                statusBadge = '<span class="badge badge-red">已停用</span>';
+                actionBtns = `
+                    <button onclick="updateCodeStatus('${item.code}', 0)" class="text-green-600 hover:text-green-700 mx-1" title="启用"><i class="fa-solid fa-play"></i></button>
+                    <button onclick="deleteCode('${item.code}', true)" class="text-red-500 hover:text-red-600 mx-1" title="删除"><i class="fa-solid fa-trash"></i></button>
+                `;
+            } else if (item.status === 1) {
+                // 已使用状态下，根据 invite_status 细化
+                const invStatus = item.invite_status || 'new';
+                if (invStatus === 'in_space') {
+                    statusBadge = '<span class="badge badge-green">已进入车队</span>';
+                } else if (invStatus === 'pending') {
+                    statusBadge = '<span class="badge badge-blue">待处理邀请</span>';
+                } else if (invStatus === 'new') {
+                    statusBadge = '<span class="badge badge-zinc">已绑定未邀请</span>';
+                } else if (invStatus === 'expired') {
+                    statusBadge = '<span class="badge badge-red">已过期/封禁</span>';
+                } else {
+                    statusBadge = `<span class="badge badge-zinc">${invStatus}</span>`;
+                }
+
+                // 为待处理邀请状态添加刷新按钮
+                const refreshBtn = invStatus === 'pending' ?
+                    `<button onclick="refreshInviteStatus('${item.code}', '${item.used_by || ''}')" class="text-purple-500 hover:text-purple-600 mx-1" title="刷新状态"><i class="fa-solid fa-rotate"></i></button>` : '';
+
+                actionBtns = `
+                    ${refreshBtn}
+                    <button onclick="unbindCode('${item.code}')" class="text-orange-500 hover:text-orange-600 mx-1" title="解绑"><i class="fa-solid fa-link-slash"></i></button>
+                    <button onclick="rebindCode('${item.code}')" class="text-blue-500 hover:text-blue-600 mx-1" title="换绑"><i class="fa-solid fa-exchange-alt"></i></button>
+                    <button onclick="updateCodeStatus('${item.code}', 2)" class="text-red-500 hover:text-red-600 mx-1" title="暂停"><i class="fa-solid fa-ban"></i></button>
+                    <button onclick="deleteCode('${item.code}', true)" class="text-red-600 hover:text-red-700 mx-1" title="强制删除"><i class="fa-solid fa-trash-can"></i></button>
+                `;
+            } else {
+                actionBtns = `
+                    <button onclick="updateCodeStatus('${item.code}', 2)" class="text-red-500 hover:text-red-600 mx-1" title="停用"><i class="fa-solid fa-ban"></i></button>
+                    <button onclick="deleteCode('${item.code}', false)" class="text-red-500 hover:text-red-600 mx-1" title="删除"><i class="fa-solid fa-trash"></i></button>
+                `;
+            }
+
+            const copyBtn = `<button onclick="copyCode('${item.code}', this)" class="text-blue-500 hover:text-blue-600 mx-1" title="复制"><i class="fa-regular fa-copy"></i></button>`;
+
+            // 车队名称显示
+            const teamDisplay = item.bound_team_name ? `<div class="text-[10px] text-muted-foreground mt-1"><i class="fa-solid fa-server mr-1"></i>${item.bound_team_name}</div>` : '';
+
+            return `
+                <tr class="group">
+                    <td class="p-4">
+                        <div class="font-mono text-xs font-medium select-all ${item.status === 2 ? 'line-through text-muted-foreground' : 'text-foreground'}">${item.code}</div>
+                        ${teamDisplay}
+                    </td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 text-xs text-muted-foreground">
+                        <div>创建: ${formatDateTime(item.created_at)}</div>
+                        ${item.used_at ? `<div class="mt-0.5">使用: ${formatDateTime(item.used_at)}</div>` : ''}
+                    </td>
+                    <td class="p-4 text-xs">
+                        ${item.used_by ? `<div class="font-medium">${item.used_by}</div>` : '<span class="text-muted-foreground">-</span>'}
+                    </td>
+                    <td class="p-4 text-xs text-muted-foreground max-w-[150px] truncate" title="${item.note || ''}">${item.note || '-'}</td>
+                    <td class="p-4 text-right whitespace-nowrap">
+                        ${copyBtn}
+                        ${actionBtns}
+                    </td>
+                </tr>
+            `;
+        }
+
+        async function copyCode(code, el) {
+            try {
+                // 优先使用现代化 Clipboard API
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(code);
+                } else {
+                    // 回退方案：使用隐藏的 textarea
+                    const textArea = document.createElement("textarea");
+                    textArea.value = code;
+                    textArea.style.position = "fixed";
+                    textArea.style.left = "-999999px";
+                    textArea.style.top = "-999999px";
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    if (!successful) throw new Error('execCommand failed');
+                }
+
+                // 成功反馈
+                const btn = el || document.activeElement;
+                if (btn && btn.tagName === 'BUTTON') {
+                    const original = btn.innerHTML;
+                    btn.innerHTML = '<i class="fa-solid fa-check text-green-500"></i>';
+                    setTimeout(() => btn.innerHTML = original, 1000);
+                }
+            } catch (err) {
+                console.error('Copy failed:', err);
+                await Modal.warning('复制失败，请手动选择文字复制');
+            }
+        }
+
+        // --- Logic (Code Operations) matches previous logic exactly ---
+        async function deleteCode(code, force = false) {
+            const msg = force ?
+                `⚠️ 警告！确定要强制删除激活码 ${code.slice(0, 8)}... 吗？\n\n这可能影响已绑定用户！` :
+                `确定要删除激活码 ${code.slice(0, 8)}... 吗？`;
+            if (!await Modal.confirm(msg, '确认')) return;
+
+            const formData = new FormData();
+            formData.append('code', code);
+            if (force) formData.append('force', 'true');
+
+            fetch('/admin/api/activation-codes/delete', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(async d => {
+                    if (d.success) loadActivationCodes();
+                    else await Modal.error('删除失败: ' + d.message);
+                });
+        }
+
+        async function unbindCode(code) {
+            if (!await Modal.confirm(`确定解绑 ${code.slice(0, 8)}... 吗？
+此操作不可撤销。`, '解绑激活码')) return;
+            const fd = new FormData(); fd.append('code', code);
+            const r = await fetch('/admin/api/activation-codes/unbind', { method: 'POST', body: fd });
+            const d = await r.json();
+            if (d.success) { loadActivationCodes(); } else { await Modal.error(d.message); }
+        }
+
+        async function rebindCode(code) {
+            const email = await Modal.prompt("输入新邮箱：");
+            if (!email) return;
+            const fd = new FormData(); fd.append('code', code); fd.append('email', email);
+            const r = await fetch('/admin/api/activation-codes/rebind', { method: 'POST', body: fd });
+            const d = await r.json();
+            if (d.success) { loadActivationCodes(); } else { await Modal.error(d.message); }
+        }
+
+        async function updateCodeStatus(code, status) {
+            const fd = new FormData(); fd.append('code', code); fd.append('status', status);
+            const r = await fetch('/admin/api/activation-codes/status', { method: 'POST', body: fd });
+            const d = await r.json();
+            if (d.success) { loadActivationCodes(); } else { await Modal.error(d.message); }
+        }
+
+        async function refreshInviteStatus(code, email) {
+            const fd = new FormData();
+            fd.append('code', code);
+            fd.append('email', email);
+            const r = await fetch('/admin/api/activation-codes/refresh-invite', { method: 'POST', body: fd });
+            const d = await r.json();
+            if (d.success) {
+                await Modal.success(d.message);
+                loadActivationCodes();
+            } else {
+                await Modal.error(d.message);
+            }
+        }
+
+        // --- Pending Invites & Records ---
+
+        function loadPendingInvites() {
+            startRefreshAnimation('refresh-pending-icon');
+            fetch('/admin/api/pending-invites')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        appStore.pending.items = data.items || [];
+                        renderTable('pending', renderPendingRow);
+
+                        const total = data.total || 0;
+                        document.getElementById('stat-pending').textContent = total;
+
+                        const badge = document.getElementById('tab-count-pending');
+                        badge.textContent = total;
+                        if (total > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+
+                        updateAvailableSeats();
+                    }
+                })
+                .finally(() => stopRefreshAnimation('refresh-pending-icon'));
+        }
+
+        function renderPendingRow(item) {
+            return `
+                <tr class="group">
+                    <td class="p-4 select-all font-medium">${item.email_address}</td>
+                    <td class="p-4"><span class="badge badge-blue">${item.role}</span></td>
+                    <td class="p-4 text-xs text-muted-foreground font-mono">${formatDateTime(item.created_time)}</td>
+                    <td class="p-4 text-xs text-muted-foreground font-mono">${item.id.slice(0, 8)}...</td>
+                    <td class="p-4 text-right">
+                        <button onclick="cancelInvite('${item.id}', '${item.email_address}')" 
+                            class="text-red-500 hover:text-red-600 transition-colors" title="取消邀请">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        async function cancelInvite(inviteId, email) {
+            if (!await Modal.confirm(`确定要取消对 ${email} 的邀请吗？
+
+此操作不可撤销。`, '取消邀请')) return;
+
+            const fd = new FormData();
+            fd.append('email', email);
+
+            const r = await fetch('/admin/api/pending-invites/cancel', { method: 'POST', body: fd });
+            const data = await r.json();
+            if (data.success) {
+                loadPendingInvites();
+                loadStats();
+            } else {
+                await Modal.error('取消失败: ' + data.message);
+            }
+        }
+
+        function loadMembers() {
+            startRefreshAnimation('refresh-members-icon');
+            fetch('/admin/api/members')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        appStore.members.items = data.items || [];
+                        renderTable('members', renderMembersRow);
+
+                        const badge = document.getElementById('tab-count-members');
+                        badge.textContent = data.total || (data.items ? data.items.length : 0);
+                        if (data.items && data.items.length > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+                    }
+                })
+                .finally(() => stopRefreshAnimation('refresh-members-icon'));
+        }
+
+        function renderMembersRow(item) {
+            const roleBadge = item.role === 'account-owner'
+                ? '<span class="badge badge-purple">管理员</span>'
+                : '<span class="badge badge-blue">成员</span>';
+
+            let statusBadge;
+            if (item.deactivated_time) {
+                statusBadge = '<span class="badge badge-red">已停用</span>';
+            } else {
+                statusBadge = '<span class="badge badge-green">活跃</span>';
+            }
+
+            const activationCodeDisplay = item.activation_code
+                ? `<span class="font-mono text-xs">${item.activation_code.slice(0, 12)}...</span>`
+                : '<span class="text-orange-500 text-xs">未绑定</span>';
+
+            // 管理员不能被踢出
+            const actionBtn = item.role === 'account-owner'
+                ? '<span class="text-xs text-muted-foreground">-</span>'
+                : `<button onclick="removeMember('${item.id}', '${item.email}')" 
+                     class="text-red-500 hover:text-red-600 transition-colors" title="踢出成员">
+                     <i class="fa-solid fa-user-minus"></i>
+                   </button>`;
+
+            return `
+                <tr class="group">
+                    <td class="p-4 text-sm font-medium">${item.name || '-'}</td>
+                    <td class="p-4 text-sm font-mono select-all text-muted-foreground">${item.email}</td>
+                    <td class="p-4">${activationCodeDisplay}</td>
+                    <td class="p-4">${roleBadge}</td>
+                    <td class="p-4 text-xs text-muted-foreground font-mono">${formatDateTime(item.created_time)}</td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 text-right">${actionBtn}</td>
+                </tr>
+            `;
+        }
+
+        async function removeMember(userId, email) {
+            if (!await Modal.warning(`确定要将 ${email} 踢出Team吗？
+
+此操作不可撤销！`, '⚠️ 踢出成员')) return;
+
+            const fd = new FormData();
+            fd.append('user_id', userId);
+
+            const r = await fetch('/admin/api/members/remove', { method: 'POST', body: fd });
+            const data = await r.json();
+            if (data.success) {
+                loadMembers();
+                loadStats();
+            } else {
+                await Modal.error('踢出失败: ' + data.message);
+            }
+        }
+
+        function loadRecords() {
+            startRefreshAnimation('refresh-records-icon');
+            fetch('/admin/api/records')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        appStore.records.items = data.records || [];
+                        renderTable('records', renderRecordsRow);
+                    }
+                })
+                .finally(() => stopRefreshAnimation('refresh-records-icon'));
+        }
+
+        function renderRecordsRow(r) {
+            const successBadge = r.success
+                ? '<span class="badge badge-green">Success</span>'
+                : `<span class="badge badge-red" title="${r.message}">Failed</span>`;
+
+            const userDisplay = r.username || r.linuxdo_username || '-';
+
+            return `
+                <tr class="group">
+                    <td class="p-4 text-xs text-muted-foreground font-mono">#${r.id}</td>
+                    <td class="p-4 text-sm font-medium">${userDisplay}</td>
+                    <td class="p-4 text-sm">
+                        <div class="font-medium">${r.email}</div>
+                        <div class="text-xs text-muted-foreground font-mono mt-0.5">${r.activation_code || '-'}</div>
+                    </td>
+                    <td class="p-4">${successBadge}</td>
+                    <td class="p-4 text-xs text-muted-foreground">
+                        <div>${r.created_at}</div>
+                        <div class="font-mono mt-0.5">${r.ip}</div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // --- Stats & Global ---
+
+        // 存储本地待上车人数
+        let localWaitingNew = 0;   // 本地已绑定未邀请
+        let apiPendingInvites = 0; // API 待接收邀请
+
+        function updateAvailableSeats() {
+            const inUse = parseInt(document.getElementById('stat-in-use').textContent) || 0;
+            const total = parseInt(document.getElementById('stat-total').textContent) || 0;
+
+            // 占用 = 已入位 + API 待接收 + 本地已绑定未邀请
+            const available = Math.max(0, total - inUse - apiPendingInvites - localWaitingNew);
+
+            const el = document.getElementById('stat-available');
+            el.textContent = available;
+            if (available === 0) el.classList.add('text-red-500');
+            else el.classList.remove('text-red-500');
+        }
+
+        // --- Modals ---
+
+        function showGenerateModal() {
+            document.getElementById('generate-modal').classList.remove('hidden');
+        }
+        function hideGenerateModal() {
+            document.getElementById('generate-modal').classList.add('hidden');
+        }
+        async function generateCodes() {
+            const count = document.getElementById('generate-count').value;
+            const note = document.getElementById('generate-note').value;
+            const btn = document.getElementById('generate-submit-btn');
+
+            btn.disabled = true;
+            btn.innerHTML = '...';
+
+            const fd = new FormData();
+            fd.append('count', count);
+            fd.append('note', note);
+
+            try {
+                const r = await fetch('/admin/api/activation-codes/generate', { method: 'POST', body: fd });
+                const d = await r.json();
+                if (d.success) {
+                    hideGenerateModal();
+                    loadActivationCodes();
+
+                    if (d.codes && d.codes.length > 0) {
+                        const codesText = d.codes.map(c => c.code).join('\n');
+
+                        // Copy functionality
+                        if (await Modal.confirm(`生成成功！复制 ${d.codes.length} 个激活码？`, '复制激活码')) {
+                            navigator.clipboard.writeText(codesText);
+                        }
+
+                        // One-click import functionality
+                        if (await Modal.confirm(`是否将这 ${d.codes.length} 个激活码一键导入到库存？`, '一键入库')) {
+                            const stockFd = new FormData();
+                            stockFd.append('codes', codesText);
+
+                            try {
+                                const stockResp = await fetch('/admin/api/stock/add', { method: 'POST', body: stockFd });
+                                const stockData = await stockResp.json();
+                                if (stockData.success) {
+                                    await Modal.success(stockData.message || '入库成功');
+                                } else {
+                                    await Modal.error('入库失败: ' + stockData.message);
+                                }
+                            } catch (err) {
+                                await Modal.error('网络错误: ' + err.message);
+                            }
+                        }
+                    }
+                } else {
+                    await Modal.error('Error: ' + d.message);
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '确认生成';
+            }
+        }
+
+
+        function loadStats() {
+            // 加载车位统计
+            fetch('/stats')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        const d = data.data;
+                        document.getElementById('stat-in-use').textContent = d.seats_in_use || 0;
+                        document.getElementById('stat-total').textContent = d.seats_entitled || 0;
+
+                        // 修正逻辑：待上车 = API 待接收 (pending) + 本地已绑定未邀请 (new)
+                        apiPendingInvites = d.pending_invites || 0;
+                        if (data.local_boarding) {
+                            localWaitingNew = data.local_boarding.waiting_invite || 0;
+                            // 注意：data.local_boarding.pending_accept 可能与 apiPendingInvites 重合
+                            // 我们以 apiPendingInvites 为准，因为它包含你在后台私自邀请的人
+                            document.getElementById('stat-pending').textContent = apiPendingInvites + localWaitingNew;
+                        } else {
+                            document.getElementById('stat-pending').textContent = apiPendingInvites;
+                        }
+                        updateAvailableSeats();
+                    }
+                });
+
+            // 加载邀请统计（当前母号 + 全站 + 本地待上车）
+            fetch('/admin/api/stats')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        // 全站统计
+                        if (data.global_stats) {
+                            document.getElementById('stat-global-invited').textContent = data.global_stats.total_invited || 0;
+                        }
+                        // 当前母号统计
+                        if (data.stats) {
+                            document.getElementById('stat-current-team-invited').textContent =
+                                `当前母号: ${data.stats.total_invited || 0} 次邀请`;
+                        }
+                        // 本地待上车（备用）
+                        if (data.local_boarding) {
+                            localWaitingNew = data.local_boarding.waiting_invite || 0;
+                            // 注意：这里的 apiPendingInvites 依然使用 /stats 获取的最新的值
+                            document.getElementById('stat-pending').textContent = apiPendingInvites + localWaitingNew;
+                            updateAvailableSeats();
+                        }
+                    }
+                })
+                .catch(err => {
+                    // 静默处理错误（可能未登录）
+                    document.getElementById('stat-global-invited').textContent = '-';
+                    document.getElementById('stat-current-team-invited').textContent = '请先登录';
+                });
+        }
+
+        function forceRefreshStats() {
+            const btn = document.getElementById('force-refresh-btn');
+            const icon = document.getElementById('force-refresh-icon');
+
+            btn.disabled = true;
+            icon.classList.add('fa-spin');
+
+            fetch('/stats?refresh=1')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        const d = data.data;
+                        document.getElementById('stat-in-use').textContent = d.seats_in_use || 0;
+                        document.getElementById('stat-total').textContent = d.seats_entitled || 0;
+
+                        // 更新名额统计
+                        apiPendingInvites = d.pending_invites || 0;
+                        if (data.local_boarding) {
+                            localWaitingNew = data.local_boarding.waiting_invite || 0;
+                            document.getElementById('stat-pending').textContent = apiPendingInvites + localWaitingNew;
+                        } else {
+                            document.getElementById('stat-pending').textContent = apiPendingInvites;
+                        }
+                        updateAvailableSeats();
+                        statsCountdown = 60; // 重置倒计时
+                    }
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    icon.classList.remove('fa-spin');
+                });
+
+            // 同时刷新其他数据
+            loadPendingInvites();
+            loadMembers();
+        }
+
+
+        // ============ 母号管理 ============
+
+        function loadTeamConfigs() {
+            startRefreshAnimation('refresh-teamconfig-icon');
+            const includeBanned = document.getElementById('show-banned-teamconfig').checked;
+            const page = appStore.teamconfig.page || 1;
+            fetch(`/admin/api/team-configs?include_banned=${includeBanned}&page=${page}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        appStore.teamconfig.items = data.configs || [];
+                        appStore.teamconfig.total = data.total || 0;
+                        document.getElementById('teamconfig-total').textContent = data.total || 0;
+                        renderTable('teamconfig', renderTeamConfigRow);
+
+                        const activeCount = (data.configs || []).filter(c => c.is_active).length;
+                        const badge = document.getElementById('tab-count-teamconfig');
+                        badge.textContent = activeCount;
+                        if (activeCount > 0) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+                    }
+                })
+                .finally(() => stopRefreshAnimation('refresh-teamconfig-icon'));
+        }
+
+        function applyTeamConfigFilter(resetPage = true) {
+            if (resetPage) appStore.teamconfig.page = 1;
+            loadTeamConfigs();
+        }
+
+        function renderTeamConfigRow(item) {
+            const isActive = item.is_active;
+            const isBanned = item.status === 0;
+
+            const statusBadge = isActive
+                ? '<span class="badge badge-green whitespace-nowrap"><i class="fa-solid fa-circle text-[6px] mr-1"></i>激活中</span>'
+                : isBanned
+                    ? '<span class="badge badge-red whitespace-nowrap"><i class="fa-solid fa-circle text-[6px] mr-1"></i>已封禁</span>'
+                    : '<span class="badge badge-zinc whitespace-nowrap">未激活</span>';
+
+            // 车位统计
+            const seatsInUse = item.seats_in_use || 0;
+            const seatsEntitled = item.seats_entitled || 0;
+            const pendingInvites = item.pending_invites || 0;
+            const localWaiting = item.local_waiting_invite || 0; // 本地已绑定激活码还未邀的用户
+            const totalOccupancy = seatsInUse + pendingInvites + localWaiting;
+            const seatsAvailable = Math.max(0, seatsEntitled - totalOccupancy);
+
+            // 是否满员
+            const isFull = seatsAvailable <= 0 && seatsEntitled > 0;
+            const seatsBadgeClass = isFull ? 'text-red-600' : 'text-foreground';
+
+            // 车位信息显示
+            let seatsInfo = '-';
+            if (seatsEntitled > 0 || item.stats_updated_at) {
+                seatsInfo = `
+                    <div class="flex flex-col gap-0.5" title="API占用: ${seatsInUse}\nAPI待接收: ${pendingInvites}\n本地待邀请: ${localWaiting}">
+                        <div class="flex items-center gap-2">
+                            <span class="${seatsBadgeClass} font-medium">${seatsInUse}/${seatsEntitled}</span>
+                            ${(pendingInvites + localWaiting) > 0 ? `<span class="text-orange-500 text-[11px] font-medium">(+${pendingInvites + localWaiting}占位)</span>` : ''}
+                            ${isFull ? '<span class="badge badge-red text-[10px] scale-90 origin-left">已满</span>' : ''}
+                        </div>
+                        ${localWaiting > 0 ? `<div class="text-[10px] text-zinc-400 leading-none">含 ${localWaiting} 个本地待邀请</div>` : ''}
+                    </div>
+                `;
+            }
+
+            // 开号时间
+            let activeStartDisplay = '-';
+            if (item.active_start) {
+                const d = new Date(typeof item.active_start === 'number' ? item.active_start * 1000 : item.active_start);
+                activeStartDisplay = d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+            }
+
+            // 数据更新时间
+            const statsUpdated = item.stats_updated_at ? formatDateTime(item.stats_updated_at) : '从未同步';
+
+            let actionBtns = '';
+            const checkBtn = `<button onclick="checkTeamConfigStatus(${item.id}, this)" class="text-yellow-500 hover:text-yellow-600 mx-1" title="检测母号状态"><i class="fa-solid fa-magnifying-glass-chart"></i></button>`;
+
+            if (isActive) {
+                actionBtns = `
+                    ${checkBtn}
+                    <button onclick="editTeamConfig(${item.id})" class="text-blue-500 hover:text-blue-600 mx-1" title="编辑">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                `;
+            } else {
+                actionBtns = `
+                    <button onclick="activateTeamConfig(${item.id})" class="text-green-500 hover:text-green-600 mx-1 ${isBanned ? 'opacity-30 cursor-not-allowed' : ''}" title="${isBanned ? '母号已封禁，无法激活' : '激活此配置'}" ${isBanned ? 'disabled' : ''}>
+                        <i class="fa-solid fa-power-off"></i>
+                    </button>
+                    ${checkBtn}
+                    <button onclick="editTeamConfig(${item.id})" class="text-blue-500 hover:text-blue-600 mx-1" title="编辑">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button onclick="deleteTeamConfig(${item.id})" class="text-red-500 hover:text-red-600 mx-1" title="删除">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+            }
+
+            return `
+                <tr class="group ${isActive ? 'bg-green-50/50' : ''} ${isBanned ? 'opacity-70' : ''}" title="Account: ${item.account_id || '-'}\n备注: ${item.note || '无'}">
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 font-medium ${isBanned ? 'line-through text-muted-foreground' : ''}">${item.name || '未命名'}</td>
+                    <td class="p-4">${seatsInfo}</td>
+                    <td class="p-4 text-xs text-muted-foreground">${activeStartDisplay}</td>
+                    <td class="p-4 text-xs text-muted-foreground">${statsUpdated}</td>
+                    <td class="p-4 text-right whitespace-nowrap">${actionBtns}</td>
+                </tr>
+            `;
+        }
+
+        function showTeamConfigModal(editId = null) {
+            document.getElementById('teamconfig-edit-id').value = editId || '';
+            document.getElementById('teamconfig-modal-title').textContent = editId ? '编辑母号配置' : '添加母号配置';
+            document.getElementById('teamconfig-error').classList.add('hidden');
+
+            // 清空表单
+            document.getElementById('teamconfig-name').value = '';
+            document.getElementById('teamconfig-token').value = '';
+            document.getElementById('teamconfig-account-id').value = '';
+            document.getElementById('teamconfig-owner-email').value = '';
+            document.getElementById('teamconfig-note').value = '';
+            document.getElementById('teamconfig-is-active').checked = false;
+            document.getElementById('teamconfig-allow-overload').checked = false;
+            document.getElementById('teamconfig-max-overload').value = '0';
+
+            // 如果是编辑模式，加载现有数据
+            if (editId) {
+                fetch(`/admin/api/team-configs/${editId}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.config) {
+                            const c = data.config;
+                            document.getElementById('teamconfig-name').value = c.name || '';
+                            document.getElementById('teamconfig-token').value = c.authorization_token || '';
+                            document.getElementById('teamconfig-account-id').value = c.account_id || '';
+                            document.getElementById('teamconfig-owner-email').value = c.owner_email || '';
+                            document.getElementById('teamconfig-note').value = c.note || '';
+                            document.getElementById('teamconfig-is-active').checked = c.is_active === 1;
+                            document.getElementById('teamconfig-allow-overload').checked = c.allow_overload === 1;
+                            document.getElementById('teamconfig-max-overload').value = (c.max_overload ?? 0).toString();
+                        }
+                    });
+            }
+
+            document.getElementById('teamconfig-modal').classList.remove('hidden');
+        }
+
+        function hideTeamConfigModal() {
+            document.getElementById('teamconfig-modal').classList.add('hidden');
+        }
+
+        function editTeamConfig(id) {
+            showTeamConfigModal(id);
+        }
+
+        async function fillTeamConfigFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (!text) {
+                    await Modal.error('剪切板为空');
+                    return;
+                }
+
+                // 尝试解析格式：名称:母号邮箱:Account ID:Authorization Token
+                const parts = text.split(':');
+                if (parts.length < 4) {
+                    await Modal.error('格式错误，请确保格式为：\n名称:母号邮箱:Account ID:Authorization Token');
+                    return;
+                }
+
+                const name = parts[0].trim();
+                const email = parts[1].trim();
+                const accountId = parts[2].trim();
+                const token = parts.slice(3).join(':').trim();
+
+                document.getElementById('teamconfig-name').value = name;
+                document.getElementById('teamconfig-owner-email').value = email;
+                document.getElementById('teamconfig-account-id').value = accountId;
+                document.getElementById('teamconfig-token').value = token;
+
+                await Modal.success('已自动填充');
+            } catch (err) {
+                console.error('Clipboard read failed:', err);
+                await Modal.error('无法读取剪切板，请检查浏览器权限');
+            }
+        }
+
+        function saveTeamConfig() {
+            const editId = document.getElementById('teamconfig-edit-id').value;
+            const name = document.getElementById('teamconfig-name').value.trim();
+            const token = document.getElementById('teamconfig-token').value.trim();
+            const accountId = document.getElementById('teamconfig-account-id').value.trim();
+            const ownerEmail = document.getElementById('teamconfig-owner-email').value.trim();
+            const note = document.getElementById('teamconfig-note').value.trim();
+            const isActive = document.getElementById('teamconfig-is-active').checked;
+            const allowOverload = document.getElementById('teamconfig-allow-overload').checked;
+            const maxOverload = document.getElementById('teamconfig-max-overload').value.trim();
+
+            const errorEl = document.getElementById('teamconfig-error');
+
+            if (!token || !accountId) {
+                errorEl.textContent = 'Token 和 Account ID 为必填项';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            const btn = document.getElementById('teamconfig-submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i>保存中...';
+
+            const formData = new FormData();
+            if (editId) formData.append('id', editId);
+            formData.append('name', name || '新母号');
+            formData.append('authorization_token', token);
+            formData.append('account_id', accountId);
+            formData.append('owner_email', ownerEmail);
+            formData.append('note', note);
+            formData.append('is_active', isActive ? '1' : '0');
+            formData.append('allow_overload', allowOverload ? '1' : '0');
+            formData.append('max_overload', maxOverload || '0');
+
+            const url = editId ? '/admin/api/team-configs/update' : '/admin/api/team-configs/create';
+
+            fetch(url, { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        hideTeamConfigModal();
+                        loadTeamConfigs();
+                    } else {
+                        errorEl.textContent = data.message || '操作失败';
+                        errorEl.classList.remove('hidden');
+                    }
+                })
+                .catch(err => {
+                    errorEl.textContent = '网络错误，请重试';
+                    errorEl.classList.remove('hidden');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = '保存配置';
+                });
+        }
+
+        async function activateTeamConfig(id) {
+            if (!await Modal.confirm('确定要切换到此母号配置吗？\n\n切换后将使用此配置的 Token 和 Account ID 进行操作。')) return;
+
+            const formData = new FormData();
+            formData.append('id', id);
+
+            const r = await fetch('/admin/api/team-configs/activate', { method: 'POST', body: formData });
+            const data = await r.json();
+            if (data.success) {
+                loadTeamConfigs();
+                // 刷新统计数据以反映新配置
+                forceRefreshStats();
+            } else {
+                await Modal.error('切换失败: ' + data.message);
+            }
+        }
+
+        async function deleteTeamConfig(id) {
+            if (!await Modal.confirm('确定要删除此母号配置吗？\n\n此操作不可恢复。')) return;
+
+            const formData = new FormData();
+            formData.append('id', id);
+
+            const r = await fetch('/admin/api/team-configs/delete', { method: 'POST', body: formData });
+            const data = await r.json();
+            if (data.success) {
+                loadTeamConfigs();
+            } else {
+                await Modal.error('删除失败: ' + data.message);
+            }
+        }
+
+        async function checkTeamConfigStatus(id, btn) {
+            const formData = new FormData();
+            formData.append('id', id);
+
+            try {
+                // 显示加载提示
+                const originalIcon = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+                btn.disabled = true;
+
+                const r = await fetch('/admin/api/team-configs/check-status', { method: 'POST', body: formData });
+                const data = await r.json();
+
+                btn.innerHTML = originalIcon;
+                btn.disabled = false;
+
+                if (data.success) {
+                    if (data.is_banned) {
+                        await Modal.warning(data.message, '检测完成');
+                    } else {
+                        await Modal.success(data.message, '检测完成');
+                    }
+                    loadTeamConfigs();
+                    // 如果是当前激活的母号，也刷新一下首页统计
+                    forceRefreshStats();
+                } else {
+                    await Modal.error('检测失败: ' + data.message);
+                }
+            } catch (err) {
+                await Modal.error('网络错误: ' + err.message);
+            }
+        }
+
+        // ============ 系统日志 ============
+
+        function loadLogs() {
+            startRefreshAnimation('refresh-logs-icon');
+            const statusEl = document.getElementById('log-status');
+            statusEl.textContent = '获取中...';
+
+            fetch('/admin/api/logs')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const container = document.getElementById('logs-container');
+                        const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
+
+                        // 处理 ANSI 颜色（简单的，如果有的话）
+                        let logContent = data.logs || '暂无日志';
+
+                        // 转义 HTML
+                        const div = document.createElement('div');
+                        div.innerText = logContent;
+                        logContent = div.innerHTML;
+
+                        // 着色逻辑 (根据关键词)
+                        logContent = logContent.replace(/INFO/g, '<span class="text-blue-400">INFO</span>');
+                        logContent = logContent.replace(/ERROR/g, '<span class="text-red-400 font-bold">ERROR</span>');
+                        logContent = logContent.replace(/WARNING/g, '<span class="text-yellow-400">WARNING</span>');
+                        logContent = logContent.replace(/\[(Success|成功)\]/g, '<span class="text-green-400">[$1]</span>');
+                        logContent = logContent.replace(/\[(Fail|失败)\]/g, '<span class="text-red-400">[$1]</span>');
+
+                        container.innerHTML = `<pre class="whitespace-pre-wrap">${logContent}</pre>`;
+
+                        document.getElementById('log-info').textContent = `总行数: ${data.total}`;
+                        statusEl.textContent = '最后更新: ' + new Date().toLocaleTimeString();
+
+                        // 如果之前就在底部，继续滚动到底部
+                        if (isAtBottom) {
+                            scrollToBottom();
+                        }
+                    } else {
+                        statusEl.textContent = '获取失败: ' + data.message;
+                    }
+                })
+                .catch(err => {
+                    statusEl.textContent = '获取失败: ' + err;
+                })
+                .finally(() => stopRefreshAnimation('refresh-logs-icon'));
+        }
+
+        function scrollToBottom() {
+            const container = document.getElementById('logs-container');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // ============ 静默检测 (节省代理流量) ============
+        let lastActivityTime = Date.now();
+        const INACTIVE_LIMIT = 5 * 60 * 1000; // 5 分钟无操作视为挂机
+
+        // 监听活动
+        ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'].forEach(evt => {
+            window.addEventListener(evt, () => { lastActivityTime = Date.now(); }, { passive: true });
+        });
+
+        function isPageActive() {
+            if (document.hidden) return false;
+            if (Date.now() - lastActivityTime > INACTIVE_LIMIT) return false;
+            return true;
+        }
+
+        // 初始化
+        let statsCountdown = 60;
+        let pendingCountdown = 60;
+
+        function updateCountdown() {
+            const countdownEl = document.getElementById('stats-countdown');
+            if (!isPageActive()) {
+                countdownEl.textContent = '已暂停自动刷新 (挂机中)';
+                return;
+            }
+
+            if (statsCountdown <= 0) {
+                countdownEl.textContent = '刷新中...';
+            } else {
+                countdownEl.textContent = `${statsCountdown}s`;
+            }
+            statsCountdown--;
+            if (statsCountdown < 0) statsCountdown = 60;
+        }
+
+        // 定时刷新
+        setInterval(() => {
+            if (isPageActive()) {
+                loadStats();
+                statsCountdown = 60;
+            }
+        }, 60000);
+
+        setInterval(() => {
+            if (isPageActive()) {
+                loadPendingInvites();
+            }
+        }, 60000);
+
+        // ============ 批量导入母号 ============
+
+        let bulkConfigs = [];
+
+        function showTeamConfigBulkModal() {
+            document.getElementById('teamconfig-bulk-modal').classList.remove('hidden');
+            document.getElementById('bulk-error').classList.add('hidden');
+            document.getElementById('bulk-progress-section').classList.add('hidden');
+            document.getElementById('bulk-json-input').value = '';
+            document.getElementById('bulk-file-input').value = '';
+            document.getElementById('bulk-import-btn').disabled = true;
+            document.getElementById('bulk-check-btn').disabled = false;
+            document.getElementById('bulk-result-summary').innerHTML = '';
+            bulkConfigs = [];
+        }
+
+        function hideTeamConfigBulkModal() {
+            document.getElementById('teamconfig-bulk-modal').classList.add('hidden');
+        }
+
+        document.getElementById('bulk-file-input').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('bulk-json-input').value = e.target.result;
+                checkBulkFormat();
+            };
+            reader.readAsText(file);
+        });
+
+        function checkBulkFormat() {
+            const input = document.getElementById('bulk-json-input').value.trim();
+            const errorEl = document.getElementById('bulk-error');
+            const importBtn = document.getElementById('bulk-import-btn');
+
+            if (!input) {
+                errorEl.textContent = '请输入或上传 JSON 内容';
+                errorEl.classList.remove('hidden');
+                importBtn.disabled = true;
+                return;
+            }
+
+            try {
+                const data = JSON.parse(input);
+                if (!Array.isArray(data)) {
+                    throw new Error('JSON 必须是数组格式 (Array)');
+                }
+                if (data.length === 0) {
+                    throw new Error('数组为空');
+                }
+
+                // 简单的结构检查
+                const invalid = data.find(item => !item.authorization_token || !item.account_id);
+                if (invalid) {
+                    throw new Error('存在缺少 authorization_token 或 account_id 的条目');
+                }
+
+                bulkConfigs = data;
+                errorEl.classList.add('hidden');
+                importBtn.disabled = false;
+                Modal.success(`格式校验通过！共 ${data.length} 个母号配置`, '校验成功');
+
+            } catch (e) {
+                errorEl.textContent = '格式错误: ' + e.message;
+                errorEl.classList.remove('hidden');
+                importBtn.disabled = true;
+                bulkConfigs = [];
+            }
+        }
+
+        async function startBulkImport() {
+            if (bulkConfigs.length === 0) return;
+
+            const importBtn = document.getElementById('bulk-import-btn');
+            const checkBtn = document.getElementById('bulk-check-btn');
+            const cancelBtn = document.getElementById('bulk-cancel-btn');
+            const progressSection = document.getElementById('bulk-progress-section');
+            const progressBar = document.getElementById('bulk-progress-bar');
+            const progressText = document.getElementById('bulk-progress-text');
+            const statusText = document.getElementById('bulk-status-text');
+            const summaryEl = document.getElementById('bulk-result-summary');
+
+            importBtn.disabled = true;
+            checkBtn.disabled = true;
+            cancelBtn.disabled = true;
+            progressSection.classList.remove('hidden');
+            summaryEl.innerHTML = '';
+            summaryEl.classList.add('hidden');
+
+            const BATCH_SIZE = 50;
+            const total = bulkConfigs.length;
+            let processed = 0;
+            let successTotal = 0;
+            let failTotal = 0;
+            let allErrors = [];
+
+            for (let i = 0; i < total; i += BATCH_SIZE) {
+                const chunk = bulkConfigs.slice(i, i + BATCH_SIZE);
+                statusText.textContent = `正在导入 ${i + 1} - ${Math.min(i + BATCH_SIZE, total)} ...`;
+
+                try {
+                    const r = await fetch('/admin/api/team-configs/batch-create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ configs: chunk })
+                    });
+                    const data = await r.json();
+
+                    if (data.success) {
+                        successTotal += data.success_count;
+                        failTotal += data.fail_count;
+                        if (data.errors && data.errors.length > 0) {
+                            allErrors.push(...data.errors);
+                        }
+                    } else {
+                        failTotal += chunk.length;
+                        allErrors.push(`批次 ${i / BATCH_SIZE + 1} 请求失败: ${data.message}`);
+                    }
+                } catch (err) {
+                    failTotal += chunk.length;
+                    allErrors.push(`批次 ${i / BATCH_SIZE + 1} 网络错误: ${err.message}`);
+                }
+
+                processed += chunk.length;
+                const percent = Math.floor((Math.min(processed, total) / total) * 100);
+                progressBar.style.width = `${percent}%`;
+                progressText.textContent = `${Math.min(processed, total)}/${total}`;
+            }
+
+            statusText.textContent = '导入完成';
+            cancelBtn.disabled = false;
+
+            // 显示结果
+            summaryEl.classList.remove('hidden');
+            let resultHtml = `<div class="font-medium">成功: <span class="text-green-600">${successTotal}</span> | 失败: <span class="text-red-600">${failTotal}</span></div>`;
+
+            if (allErrors.length > 0) {
+                resultHtml += `<div class="mt-2 text-red-500 font-mono text-xs">错误详情:\n${allErrors.join('\n')}</div>`;
+            }
+            summaryEl.innerHTML = resultHtml;
+
+            if (successTotal > 0) {
+                loadTeamConfigs(); // 刷新列表
+                Modal.success(`导入完成！成功 ${successTotal} 个，失败 ${failTotal} 个`);
+            } else {
+                Modal.warning(`导入完成，但全部失败。请检查错误详情。`);
+            }
+        }
+
+        // 初始化
+        loadStats();
+        loadActivationCodes();
+        loadPendingInvites();
+        loadMembers();
+        loadRecords();
+
+        // 每秒更新倒计时显示
+        setInterval(updateCountdown, 1000);
+
+        switchTab('activation');
+    </script>
+</body>
+
+</html>
